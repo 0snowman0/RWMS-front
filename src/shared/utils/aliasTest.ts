@@ -1,0 +1,1 @@
+export const aliasTest = 'Alias is working'
