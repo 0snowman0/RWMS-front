@@ -1,0 +1,874 @@
+import {
+  useEffect,
+  useState,
+} from 'react'
+
+import {
+  useForm,
+} from 'react-hook-form'
+
+import {
+  Button,
+} from '@/shared/ui/button'
+
+import {
+  Checkbox,
+} from '@/shared/ui/checkbox'
+
+import {
+  Dialog,
+} from '@/shared/ui/dialog'
+
+import {
+  FormField,
+} from '@/shared/ui/form'
+
+import {
+  Input,
+} from '@/shared/ui/input'
+
+import {
+  Select,
+} from '@/shared/ui/select'
+
+import {
+  Textarea,
+} from '@/shared/ui/textarea'
+
+import type {
+  DynamicFieldDefinition,
+  DynamicFieldOption,
+  DynamicFieldType,
+} from '../types/category.types'
+
+import {
+  DynamicFieldOptionsEditor,
+} from './DynamicFieldOptionsEditor'
+
+
+interface DynamicFieldEditorProps {
+  open: boolean
+
+  field?: DynamicFieldDefinition | null
+
+  nextSortOrder: number
+
+  onOpenChange: (
+    open: boolean,
+  ) => void
+
+  onSave: (
+    field: DynamicFieldDefinition,
+  ) => void
+}
+
+
+interface DynamicFieldFormValues {
+  title: string
+
+  name: string
+
+  field_type: DynamicFieldType
+
+  required: boolean
+  unique: boolean
+
+  auto_generate: boolean
+  readonly: boolean
+  is_active: boolean
+
+  show_in_list: boolean
+
+  unit: string
+
+  placeholder: string
+
+  description: string
+
+  min_value: string
+  max_value: string
+
+  decimal_places: string
+
+  min_length: string
+  max_length: string
+
+  regex: string
+}
+
+
+const fieldTypeOptions: Array<{
+  value: DynamicFieldType
+  label: string
+}> = [
+  {
+    value: 'string',
+    label: 'متن',
+  },
+
+  {
+    value: 'integer',
+    label: 'عدد صحیح',
+  },
+
+  {
+    value: 'decimal',
+    label: 'عدد اعشاری',
+  },
+
+  {
+    value: 'boolean',
+    label: 'بله / خیر',
+  },
+
+  {
+    value: 'date',
+    label: 'تاریخ',
+  },
+
+  {
+    value: 'datetime',
+    label: 'تاریخ و زمان',
+  },
+
+  {
+    value: 'select',
+    label: 'انتخاب از لیست',
+  },
+
+  {
+    value: 'multi_select',
+    label: 'انتخاب چندگانه',
+  },
+]
+
+
+function nullableNumber(
+  value: string,
+): number | null {
+  const trimmed =
+    value.trim()
+
+  if (!trimmed) {
+    return null
+  }
+
+  const number =
+    Number(trimmed)
+
+  return Number.isNaN(number)
+    ? null
+    : number
+}
+
+
+function createDefaultValues(
+  field?: DynamicFieldDefinition | null,
+): DynamicFieldFormValues {
+  return {
+    title:
+      field?.title ?? '',
+
+    name:
+      field?.name ?? '',
+
+    field_type:
+      field?.field_type ??
+      'string',
+
+    required:
+      field?.required ??
+      false,
+
+    unique:
+      field?.unique ??
+      false,
+
+    auto_generate:
+      field?.auto_generate ??
+      false,
+
+    readonly:
+      field?.readonly ??
+      false,
+
+    is_active:
+      field?.is_active ??
+      true,
+
+    show_in_list:
+      field?.show_in_list ??
+      false,
+
+    unit:
+      field?.unit ?? '',
+
+    placeholder:
+      field?.placeholder ?? '',
+
+    description:
+      field?.description ?? '',
+
+    min_value:
+      field?.min_value !==
+      null &&
+      field?.min_value !==
+      undefined
+        ? String(
+            field.min_value,
+          )
+        : '',
+
+    max_value:
+      field?.max_value !==
+      null &&
+      field?.max_value !==
+      undefined
+        ? String(
+            field.max_value,
+          )
+        : '',
+
+    decimal_places:
+      field?.decimal_places !==
+      null &&
+      field?.decimal_places !==
+      undefined
+        ? String(
+            field.decimal_places,
+          )
+        : '',
+
+    min_length:
+      field?.min_length !==
+      null &&
+      field?.min_length !==
+      undefined
+        ? String(
+            field.min_length,
+          )
+        : '',
+
+    max_length:
+      field?.max_length !==
+      null &&
+      field?.max_length !==
+      undefined
+        ? String(
+            field.max_length,
+          )
+        : '',
+
+    regex:
+      field?.regex ?? '',
+  }
+}
+
+
+export function DynamicFieldEditor({
+  open,
+  field,
+  nextSortOrder,
+  onOpenChange,
+  onSave,
+}: DynamicFieldEditorProps) {
+  const isEditMode =
+    Boolean(field)
+
+  const [
+    options,
+    setOptions,
+  ] = useState<
+    DynamicFieldOption[]
+  >(
+    field?.options ?? [],
+  )
+
+  const {
+    register,
+    reset,
+    watch,
+    handleSubmit,
+
+    formState: {
+      errors,
+      isSubmitting,
+    },
+  } = useForm<DynamicFieldFormValues>({
+    defaultValues:
+      createDefaultValues(
+        field,
+      ),
+  })
+
+
+  const fieldType =
+    watch('field_type')
+
+
+  useEffect(() => {
+    if (!open) {
+      return
+    }
+
+    reset(
+      createDefaultValues(
+        field,
+      ),
+    )
+
+    setOptions(
+      field?.options ?? [],
+    )
+  }, [
+    open,
+    field,
+    reset,
+  ])
+
+
+  async function handleSave(
+    values: DynamicFieldFormValues,
+  ) {
+    const isString =
+      values.field_type ===
+      'string'
+
+    const isNumeric =
+      values.field_type ===
+        'integer' ||
+      values.field_type ===
+        'decimal'
+
+    const isDecimal =
+      values.field_type ===
+      'decimal'
+
+    const isSelect =
+      values.field_type ===
+        'select' ||
+      values.field_type ===
+        'multi_select'
+
+
+    const normalizedOptions =
+      isSelect
+        ? options
+            .map(
+              (option) => ({
+                value:
+                  option.value.trim(),
+
+                label:
+                  option.label.trim(),
+              }),
+            )
+            .filter(
+              (option) =>
+                option.value &&
+                option.label,
+            )
+        : []
+
+
+    const result: DynamicFieldDefinition = {
+      field_id:
+        field?.field_id ??
+        crypto.randomUUID(),
+
+      name:
+        values.name.trim(),
+
+      title:
+        values.title.trim(),
+
+      field_type:
+        values.field_type,
+
+      required:
+        values.required,
+
+      unique:
+        values.unique,
+
+      default_value:
+        field?.default_value ??
+        null,
+
+      auto_generate:
+        values.auto_generate,
+
+      readonly:
+        values.readonly,
+
+      is_active:
+        values.is_active,
+
+      sort_order:
+        field?.sort_order ??
+        nextSortOrder,
+
+      unit:
+        values.unit.trim() ||
+        null,
+
+      placeholder:
+        values.placeholder.trim() ||
+        null,
+
+      description:
+        values.description.trim() ||
+        null,
+
+      show_in_list:
+        values.show_in_list,
+
+      min_value:
+        isNumeric
+          ? nullableNumber(
+              values.min_value,
+            )
+          : null,
+
+      max_value:
+        isNumeric
+          ? nullableNumber(
+              values.max_value,
+            )
+          : null,
+
+      decimal_places:
+        isDecimal
+          ? nullableNumber(
+              values.decimal_places,
+            )
+          : null,
+
+      min_length:
+        isString
+          ? nullableNumber(
+              values.min_length,
+            )
+          : null,
+
+      max_length:
+        isString
+          ? nullableNumber(
+              values.max_length,
+            )
+          : null,
+
+      regex:
+        isString
+          ? values.regex.trim() ||
+            null
+          : null,
+
+      options:
+        normalizedOptions,
+
+      settings:
+        field?.settings ?? {},
+    }
+
+
+    onSave(result)
+
+    onOpenChange(false)
+  }
+
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={
+        onOpenChange
+      }
+      title={
+        isEditMode
+          ? 'ویرایش فیلد'
+          : 'افزودن فیلد'
+      }
+      description="مشخصات، نوع داده و قوانین فیلد را تعیین کنید."
+      size="lg"
+      footer={
+        <div className="flex justify-end gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            disabled={
+              isSubmitting
+            }
+            onClick={() =>
+              onOpenChange(
+                false,
+              )
+            }
+          >
+            انصراف
+          </Button>
+
+          <Button
+            type="submit"
+            form="dynamic-field-form"
+            isLoading={
+              isSubmitting
+            }
+          >
+            {isEditMode
+              ? 'ذخیره تغییرات'
+              : 'افزودن فیلد'}
+          </Button>
+        </div>
+      }
+    >
+      <form
+        id="dynamic-field-form"
+        className="space-y-7"
+        onSubmit={
+          handleSubmit(
+            handleSave,
+          )
+        }
+      >
+
+        {/* Basic */}
+        <section className="space-y-4">
+          <div>
+            <h3 className="text-sm font-semibold text-foreground">
+              اطلاعات اصلی
+            </h3>
+
+            <p className="mt-1 text-xs text-muted-foreground">
+              مشخصات پایه و نوع داده این فیلد را تعیین کنید.
+            </p>
+          </div>
+
+          <div className="grid gap-5 md:grid-cols-2">
+            <FormField
+              label="عنوان فیلد"
+              htmlFor="field-title"
+              required
+              error={
+                errors.title
+                  ?.message
+              }
+            >
+              <Input
+                id="field-title"
+                placeholder="مثلاً رزولوشن"
+                {...register(
+                  'title',
+                  {
+                    required:
+                      'عنوان فیلد الزامی است.',
+                  },
+                )}
+              />
+            </FormField>
+
+
+            <FormField
+              label="نام سیستمی"
+              htmlFor="field-name"
+              required
+              description="مثلاً resolution یا serial_number"
+              error={
+                errors.name
+                  ?.message
+              }
+            >
+              <Input
+                id="field-name"
+                dir="ltr"
+                placeholder="resolution"
+                {...register(
+                  'name',
+                  {
+                    required:
+                      'نام سیستمی الزامی است.',
+                  },
+                )}
+              />
+            </FormField>
+
+
+            <FormField
+              label="نوع فیلد"
+              htmlFor="field-type"
+              required
+            >
+              <Select
+                id="field-type"
+                {...register(
+                  'field_type',
+                )}
+              >
+                {fieldTypeOptions.map(
+                  (option) => (
+                    <option
+                      key={
+                        option.value
+                      }
+                      value={
+                        option.value
+                      }
+                    >
+                      {
+                        option.label
+                      }
+                    </option>
+                  ),
+                )}
+              </Select>
+            </FormField>
+
+
+            <FormField
+              label="واحد"
+              htmlFor="field-unit"
+              description="اختیاری؛ مانند kg، cm، MP"
+            >
+              <Input
+                id="field-unit"
+                placeholder="مثلاً MP"
+                {...register(
+                  'unit',
+                )}
+              />
+            </FormField>
+          </div>
+        </section>
+
+
+        {/* Numeric Rules */}
+        {(fieldType ===
+          'integer' ||
+          fieldType ===
+            'decimal') && (
+          <section className="rounded-xl border border-border bg-surface-muted/40 p-4">
+            <h3 className="text-sm font-semibold text-foreground">
+              قوانین عددی
+            </h3>
+
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              <FormField
+                label="حداقل مقدار"
+                htmlFor="field-min-value"
+              >
+                <Input
+                  id="field-min-value"
+                  type="number"
+                  step="any"
+                  dir="ltr"
+                  {...register(
+                    'min_value',
+                  )}
+                />
+              </FormField>
+
+
+              <FormField
+                label="حداکثر مقدار"
+                htmlFor="field-max-value"
+              >
+                <Input
+                  id="field-max-value"
+                  type="number"
+                  step="any"
+                  dir="ltr"
+                  {...register(
+                    'max_value',
+                  )}
+                />
+              </FormField>
+
+
+              {fieldType ===
+                'decimal' && (
+                <FormField
+                  label="تعداد رقم اعشار"
+                  htmlFor="field-decimal-places"
+                >
+                  <Input
+                    id="field-decimal-places"
+                    type="number"
+                    min="0"
+                    dir="ltr"
+                    {...register(
+                      'decimal_places',
+                    )}
+                  />
+                </FormField>
+              )}
+            </div>
+          </section>
+        )}
+
+
+        {/* String Rules */}
+        {fieldType ===
+          'string' && (
+          <section className="rounded-xl border border-border bg-surface-muted/40 p-4">
+            <h3 className="text-sm font-semibold text-foreground">
+              قوانین متن
+            </h3>
+
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              <FormField
+                label="حداقل طول"
+                htmlFor="field-min-length"
+              >
+                <Input
+                  id="field-min-length"
+                  type="number"
+                  min="0"
+                  dir="ltr"
+                  {...register(
+                    'min_length',
+                  )}
+                />
+              </FormField>
+
+
+              <FormField
+                label="حداکثر طول"
+                htmlFor="field-max-length"
+              >
+                <Input
+                  id="field-max-length"
+                  type="number"
+                  min="0"
+                  dir="ltr"
+                  {...register(
+                    'max_length',
+                  )}
+                />
+              </FormField>
+
+
+              <div className="md:col-span-2">
+                <FormField
+                  label="الگوی Regex"
+                  htmlFor="field-regex"
+                  description="اختیاری؛ برای کنترل فرمت مقدار فیلد"
+                >
+                  <Input
+                    id="field-regex"
+                    dir="ltr"
+                    placeholder="مثلاً ^[A-Z0-9]+$"
+                    {...register(
+                      'regex',
+                    )}
+                  />
+                </FormField>
+              </div>
+            </div>
+          </section>
+        )}
+
+
+        {/* Select Options */}
+        {(fieldType ===
+          'select' ||
+          fieldType ===
+            'multi_select') && (
+          <DynamicFieldOptionsEditor
+            value={options}
+            onChange={
+              setOptions
+            }
+          />
+        )}
+
+
+        {/* Behavior */}
+        <section>
+          <h3 className="text-sm font-semibold text-foreground">
+            رفتار فیلد
+          </h3>
+
+          <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <Checkbox
+              label="ورود مقدار اجباری است"
+              {...register(
+                'required',
+              )}
+            />
+
+            <Checkbox
+              label="مقدار باید یکتا باشد"
+              {...register(
+                'unique',
+              )}
+            />
+
+            <Checkbox
+              label="تولید خودکار"
+              {...register(
+                'auto_generate',
+              )}
+            />
+
+            <Checkbox
+              label="فقط خواندنی"
+              {...register(
+                'readonly',
+              )}
+            />
+
+            <Checkbox
+              label="فیلد فعال است"
+              {...register(
+                'is_active',
+              )}
+            />
+
+            <Checkbox
+              label="نمایش در لیست کالاها"
+              {...register(
+                'show_in_list',
+              )}
+            />
+          </div>
+        </section>
+
+
+        {/* Display */}
+        <section className="space-y-4">
+          <h3 className="text-sm font-semibold text-foreground">
+            نحوه نمایش
+          </h3>
+
+          <FormField
+            label="متن راهنما"
+            htmlFor="field-placeholder"
+          >
+            <Input
+              id="field-placeholder"
+              placeholder="مثلاً رزولوشن دوربین را وارد کنید"
+              {...register(
+                'placeholder',
+              )}
+            />
+          </FormField>
+
+
+          <FormField
+            label="توضیحات"
+            htmlFor="field-description"
+          >
+            <Textarea
+              id="field-description"
+              rows={3}
+              placeholder="توضیح تکمیلی درباره این فیلد..."
+              {...register(
+                'description',
+              )}
+            />
+          </FormField>
+        </section>
+      </form>
+    </Dialog>
+  )
+}

@@ -3,7 +3,7 @@ import {
   ClipboardList,
   FileText,
   LayoutDashboard,
-  PackageOpen,
+  Tags,
   Warehouse,
   X,
 } from 'lucide-react'
@@ -30,7 +30,7 @@ const navigationItems = [
   {
     label: 'دسته‌بندی کالا',
     to: '/categories',
-    icon: PackageOpen,
+    icon: Tags,
   },
   {
     label: 'بارنامه‌ها',
