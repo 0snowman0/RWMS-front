@@ -1,3 +1,4 @@
+import { WaybillSidebarMenu } from './WaybillSidebarMenu'
 import {
   Boxes,
   ClipboardList,
@@ -130,7 +131,8 @@ function AppSidebar({
               </NavLink>
             )
           })}
-        </nav>
+          <WaybillSidebarMenu />
+</nav>
 
         <div className="shrink-0 border-t border-border p-4">
           <div className="rounded-xl bg-surface-muted p-3">

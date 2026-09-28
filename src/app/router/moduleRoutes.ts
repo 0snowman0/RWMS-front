@@ -12,7 +12,19 @@ import {
   productRoutes,
 } from '@/modules/products/routes'
 
+
+import {
+  waybillTemplateRoutes,
+} from '@/modules/waybill-templates/routes'
+
+
+import {
+  waybillRoutes,
+} from '@/modules/waybills/routes'
+
 export const moduleRoutes: RouteObject[] = [
-    ...productRoutes,
+        ...waybillRoutes,
+...waybillTemplateRoutes,
+...productRoutes,
 ...categoryRoutes,
 ]
