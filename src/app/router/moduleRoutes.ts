@@ -7,6 +7,12 @@ import {
 } from '@/modules/categories/routes'
 
 
+
+import {
+  productRoutes,
+} from '@/modules/products/routes'
+
 export const moduleRoutes: RouteObject[] = [
-  ...categoryRoutes,
+    ...productRoutes,
+...categoryRoutes,
 ]
