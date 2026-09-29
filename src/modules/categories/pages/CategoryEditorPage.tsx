@@ -1,4 +1,5 @@
 import {
+  useEffect,
   useState,
 } from 'react'
 
@@ -11,6 +12,11 @@ import {
 import {
   useForm,
 } from 'react-hook-form'
+
+import {
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query'
 
 import {
   useNavigate,
@@ -38,8 +44,10 @@ import {
 } from '@/shared/forms'
 
 import {
-  mockCategories,
-} from '../mocks/categories.mock'
+  createCategory,
+  getCategoryById,
+  updateCategory,
+} from '../api/category.api'
 
 import {
   CategoryBasicInfoForm,
@@ -74,6 +82,9 @@ function CategoryEditorPage() {
   const navigate =
     useNavigate()
 
+  const queryClient =
+    useQueryClient()
+
   const {
     categoryId,
   } = useParams()
@@ -82,24 +93,41 @@ function CategoryEditorPage() {
     categoryId !== undefined
 
 
-  const category =
-    isEditMode
-      ? mockCategories.find(
-          (item) =>
-            item.id ===
-            Number(categoryId),
-        )
-      : undefined
+  const categoryIdNumber =
+    Number(categoryId)
 
+
+  const {
+    data: category,
+    isError: isCategoryError,
+  } = useQuery({
+    queryKey: [
+      'categories',
+      'detail',
+      categoryIdNumber,
+    ],
+
+    queryFn: () =>
+      getCategoryById(
+        categoryIdNumber,
+      ),
+
+    enabled:
+      isEditMode &&
+      Number.isInteger(
+        categoryIdNumber,
+      ) &&
+      categoryIdNumber > 0,
+
+    retry: false,
+  })
 
   const [
     fields,
     setFields,
   ] = useState<
     DynamicFieldDefinition[]
-  >(
-    category?.fields ?? [],
-  )
+  >([])
 
 
   const [
@@ -134,6 +162,7 @@ function CategoryEditorPage() {
     register,
     handleSubmit,
     watch,
+    reset,
 
     formState: {
       errors,
@@ -145,12 +174,9 @@ function CategoryEditorPage() {
     ),
 
     defaultValues: {
-      name:
-        category?.name ?? '',
+      name: '',
 
-      description:
-        category?.description ??
-        '',
+      description: '',
     },
   })
 
@@ -159,37 +185,150 @@ function CategoryEditorPage() {
     watch('name')
 
 
+  
+
+  useEffect(() => {
+    if (!category) {
+      return
+    }
+
+    reset({
+      name:
+        category.name,
+
+      description:
+        category.description ??
+        '',
+    })
+
+    setFields(
+      category.fields ?? [],
+    )
+  }, [
+    category,
+    reset,
+  ])
+
+
+  useEffect(() => {
+    if (
+      !isEditMode ||
+      !isCategoryError
+    ) {
+      return
+    }
+
+    notify.error(
+      'دریافت اطلاعات دستهبندی انجام نشد.',
+    )
+
+    navigate(
+      '/categories',
+    )
+  }, [
+    isCategoryError,
+    isEditMode,
+    navigate,
+  ])
+
   async function onSubmit(
     values: CategoryFormValues,
   ) {
     const payload = {
       ...values,
 
+      description:
+        values.description?.trim() ||
+        null,
+
       fields,
     }
 
-    console.log(
-      'Category form values:',
-      payload,
-    )
 
-    await new Promise(
-      (resolve) =>
-        window.setTimeout(
-          resolve,
-          400,
-        ),
-    )
+    /*
+     * Edit mode is intentionally left unchanged
+     * for this MVP step.
+     *
+     * Only CREATE is connected to the real backend.
+     */
+    if (isEditMode) {
+      if (
+        !Number.isInteger(
+          categoryIdNumber,
+        ) ||
+        categoryIdNumber <= 0
+      ) {
+        notify.error(
+          'شناسه دستهبندی نامعتبر است.',
+        )
 
-    notify.success(
-      isEditMode
-        ? 'دستهبندی با موفقیت ویرایش شد.'
-        : 'دستهبندی با موفقیت ایجاد شد.',
-    )
+        return
+      }
 
-    navigate(
-      '/categories',
-    )
+      try {
+        await updateCategory(
+          categoryIdNumber,
+          payload,
+        )
+
+        await queryClient.invalidateQueries({
+          queryKey: [
+            'categories',
+          ],
+        })
+
+        notify.success(
+          'دستهبندی با موفقیت ویرایش شد.',
+        )
+
+        navigate(
+          '/categories',
+        )
+      }
+      catch (error) {
+        console.error(
+          'Update category failed:',
+          error,
+        )
+
+        notify.error(
+          'ویرایش دستهبندی انجام نشد.',
+        )
+      }
+
+      return
+    }
+
+
+    try {
+      await createCategory(
+        payload,
+      )
+
+      await queryClient.invalidateQueries({
+        queryKey: [
+          'categories',
+        ],
+      })
+
+      notify.success(
+        'دستهبندی با موفقیت ایجاد شد.',
+      )
+
+      navigate(
+        '/categories',
+      )
+    }
+    catch (error) {
+      console.error(
+        'Create category failed:',
+        error,
+      )
+
+      notify.error(
+        'ایجاد دستهبندی انجام نشد.',
+      )
+    }
   }
 
 

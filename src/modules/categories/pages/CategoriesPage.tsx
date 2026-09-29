@@ -11,6 +11,7 @@ import {
 
 import {
   useQuery,
+  useQueryClient,
 } from '@tanstack/react-query'
 
 import {
@@ -18,16 +19,25 @@ import {
 } from 'react-router'
 
 import {
-  getPagedCategoriesMock,
-} from '../mocks/categoryRepository.mock'
+  deleteCategory,
+  getPagedCategories,
+} from '../api/category.api'
 
 import {
   createCategoryColumns,
 } from '../components/categoryColumns'
 
+import type {
+  Category,
+} from '../types/category.types'
+
 import {
   Button,
 } from '@/shared/ui/button'
+
+import {
+  ConfirmDialog,
+} from '@/shared/ui/dialog'
 
 import {
   DataTable,
@@ -40,8 +50,27 @@ import {
   PageHeader,
 } from '@/shared/ui/page-header'
 
+import {
+  notify,
+} from '@/shared/notifications'
+
 function CategoriesPage() {
   const navigate = useNavigate()
+
+  const queryClient =
+    useQueryClient()
+
+  const [
+    deleteTarget,
+    setDeleteTarget,
+  ] = useState<Category | null>(
+    null,
+  )
+
+  const [
+    isDeleting,
+    setIsDeleting,
+  ] = useState(false)
 
   const [
     pageNumber,
@@ -110,7 +139,7 @@ function CategoriesPage() {
     ],
 
     queryFn: () =>
-      getPagedCategoriesMock(
+      getPagedCategories(
         request,
       ),
   })
@@ -148,6 +177,59 @@ function CategoriesPage() {
     setPageNumber(1)
   }
 
+  async function handleConfirmDeleteCategory() {
+    if (!deleteTarget) {
+      return
+    }
+
+    setIsDeleting(true)
+
+    try {
+      await deleteCategory(
+        deleteTarget.id,
+      )
+
+      setDeleteTarget(null)
+
+      if (
+        data?.items.length === 1 &&
+        pageNumber > 1
+      ) {
+        setPageNumber(
+          (current) =>
+            Math.max(
+              1,
+              current - 1,
+            ),
+        )
+      }
+
+      await queryClient.invalidateQueries({
+        queryKey: [
+          'categories',
+        ],
+      })
+
+      notify.success(
+        'دستهبندی با موفقیت حذف شد.',
+      )
+    }
+    catch (error) {
+      console.error(
+        'Delete category failed:',
+        error,
+      )
+
+      notify.error(
+        'حذف دستهبندی انجام نشد.',
+      )
+    }
+    finally {
+      setIsDeleting(false)
+    }
+  }
+
+
   const columns = useMemo(
     () =>
       createCategoryColumns({
@@ -162,6 +244,13 @@ function CategoriesPage() {
           (category) => {
             navigate(
               `/categories/${category.id}/edit`,
+            )
+          },
+
+        onDelete:
+          (category) => {
+            setDeleteTarget(
+              category,
             )
           },
       }),
@@ -394,6 +483,37 @@ function CategoriesPage() {
             </div>
           )}
       </section>
+
+      <ConfirmDialog
+        open={
+          deleteTarget !== null
+        }
+        onOpenChange={(open) => {
+          if (
+            !open &&
+            !isDeleting
+          ) {
+            setDeleteTarget(
+              null,
+            )
+          }
+        }}
+        title="حذف دستهبندی"
+        description={
+          deleteTarget
+            ? `آیا از حذف دستهبندی «${deleteTarget.name}» مطمئن هستید`
+            : ''
+        }
+        confirmLabel="حذف دستهبندی"
+        cancelLabel="انصراف"
+        variant="danger"
+        isLoading={
+          isDeleting
+        }
+        onConfirm={
+          handleConfirmDeleteCategory
+        }
+      />
     </div>
   )
 }

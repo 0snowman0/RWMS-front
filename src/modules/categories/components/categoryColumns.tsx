@@ -1,5 +1,6 @@
 import {
   Pencil,
+  Trash2,
 } from 'lucide-react'
 
 import { Button } from '@/shared/ui/button'
@@ -23,6 +24,8 @@ interface CreateCategoryColumnsOptions {
   onSort: (column: string) => void
 
   onEdit: (category: Category) => void
+
+  onDelete: (category: Category) => void
 }
 
 const dateFormatter =
@@ -38,6 +41,7 @@ export function createCategoryColumns({
   isAscending,
   onSort,
   onEdit,
+  onDelete,
 }: CreateCategoryColumnsOptions): DataTableColumn<Category>[] {
   return [
     {
@@ -140,25 +144,47 @@ export function createCategoryColumns({
       header: 'عملیات',
 
       cell: ({ row }) => (
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() =>
-            onEdit(row.original)
-          }
-          title="ویرایش دسته‌بندی"
-          aria-label="ویرایش دسته‌بندی"
-        >
-          <Pencil
-            size={16}
-            strokeWidth={1.8}
-          />
+        <div className="flex items-center gap-1">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() =>
+              onEdit(row.original)
+            }
+            title="ویرایش دستهبندی"
+            aria-label="ویرایش دستهبندی"
+          >
+            <Pencil
+              size={16}
+              strokeWidth={1.8}
+            />
 
-          <span className="hidden lg:inline">
-            ویرایش
-          </span>
-        </Button>
+            <span className="hidden lg:inline">
+              ویرایش
+            </span>
+          </Button>
+
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() =>
+              onDelete(row.original)
+            }
+            title="حذف دستهبندی"
+            aria-label="حذف دستهبندی"
+          >
+            <Trash2
+              size={16}
+              strokeWidth={1.8}
+            />
+
+            <span className="hidden lg:inline">
+              حذف
+            </span>
+          </Button>
+        </div>
       ),
     },
   ]
