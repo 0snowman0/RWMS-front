@@ -2,7 +2,6 @@ import { WaybillSidebarMenu } from './WaybillSidebarMenu'
 import {
   Boxes,
   ClipboardList,
-  FileText,
   LayoutDashboard,
   Tags,
   Warehouse,
@@ -33,11 +32,7 @@ const navigationItems = [
     to: '/categories',
     icon: Tags,
   },
-  {
-    label: 'بارنامه‌ها',
-    to: '/waybills',
-    icon: FileText,
-  },
+
   {
     label: 'درخواست‌ها',
     to: '/requests',

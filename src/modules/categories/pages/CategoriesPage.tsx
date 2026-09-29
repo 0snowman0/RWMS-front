@@ -32,11 +32,6 @@ import {
 import {
   DataTable,
 } from '@/shared/ui/data-table'
-
-import {
-  Pagination,
-} from '@/shared/ui/pagination'
-
 import {
   Input,
 } from '@/shared/ui/input'
@@ -260,12 +255,50 @@ function CategoriesPage() {
               </p>
             </div>
 
-            <div className="text-sm text-muted-foreground">
-              {data
-                ? `${data.total_count.toLocaleString(
-                    'fa-IR',
-                  )} نتیجه`
-                : ''}
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="text-sm text-muted-foreground">
+                {data
+                  ? `${data.total_count.toLocaleString(
+                      'fa-IR',
+                    )} نتیجه`
+                  : ''}
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">
+                  تعداد نمایش:
+                </span>
+
+                <select
+                  value={pageSize}
+                  className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15"
+                  onChange={(
+                    event,
+                  ) =>
+                    handlePageSizeChange(
+                      Number(
+                        event.target.value,
+                      ),
+                    )
+                  }
+                >
+                  <option value={10}>
+                    ۱۰
+                  </option>
+
+                  <option value={20}>
+                    ۲۰
+                  </option>
+
+                  <option value={50}>
+                    ۵۰
+                  </option>
+
+                  <option value={100}>
+                    ۱۰۰
+                  </option>
+                </select>
+              </div>
             </div>
           </div>
         </div>
@@ -297,30 +330,67 @@ function CategoriesPage() {
 
         {data &&
           data.total_count > 0 && (
-            <div className="border-t border-border">
-              <Pagination
-                page={
-                  data.page_number
-                }
-                pageSize={
-                  data.page_size
-                }
-                total={
-                  data.total_count
-                }
-                onPageChange={
-                  setPageNumber
-                }
-                onPageSizeChange={
-                  handlePageSizeChange
-                }
-                pageSizeOptions={[
-                  5,
-                  10,
-                  20,
-                  50,
-                ]}
-              />
+            <div className="flex flex-col gap-4 border-t border-border p-4 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                <span>
+                  صفحه {data.page_number} از{' '}
+                  {data.total_pages}
+                </span>
+
+                <span>
+                  {data.total_count}{' '}
+                  دستهبندی
+                </span>
+
+                <span>
+                  نمایش حداکثر{' '}
+                  {data.page_size}{' '}
+                  رکورد در هر صفحه
+                </span>
+              </div>
+
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={
+                    data.page_number <= 1 ||
+                    isLoading
+                  }
+                  onClick={() =>
+                    setPageNumber(
+                      (current) =>
+                        Math.max(
+                          1,
+                          current - 1,
+                        ),
+                    )
+                  }
+                >
+                  قبلی
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={
+                    data.page_number >=
+                      data.total_pages ||
+                    isLoading
+                  }
+                  onClick={() =>
+                    setPageNumber(
+                      (current) =>
+                        Math.min(
+                          data.total_pages,
+                          current + 1,
+                        ),
+                    )
+                  }
+                >
+                  بعدی
+                </Button>
+              </div>
             </div>
           )}
       </section>
