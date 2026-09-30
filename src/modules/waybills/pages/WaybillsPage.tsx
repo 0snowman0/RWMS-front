@@ -35,7 +35,7 @@ import {
 import {
   deleteWaybill,
   listWaybills,
-} from '../mocks/waybillRepository.mock'
+} from '../api/waybill.api'
 
 import type {
   WaybillSummary,
@@ -187,6 +187,12 @@ function WaybillsPage() {
               result.page_number,
             )
           }
+        } catch (error) {
+          notify.error(
+            error instanceof Error
+              ? error.message
+              : 'دریافت بارنامهها ناموفق بود.',
+          )
         } finally {
           setLoading(false)
         }
@@ -228,6 +234,12 @@ function WaybillsPage() {
       )
 
       await load()
+    } catch (error) {
+      notify.error(
+        error instanceof Error
+          ? error.message
+          : 'حذف بارنامه انجام نشد.',
+      )
     } finally {
       setDeleting(false)
     }

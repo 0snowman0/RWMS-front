@@ -557,3 +557,77 @@ export async function deleteWaybillTemplate(
     )
   }
 }
+
+export async function getActiveWaybillTemplates():
+  Promise<WaybillTemplate[]> {
+  try {
+    const params =
+      new URLSearchParams()
+
+    params.set(
+      'page_number',
+      '-1',
+    )
+
+    params.set(
+      'page_size',
+      '-1',
+    )
+
+    params.set(
+      'sort_by',
+      'name',
+    )
+
+    params.set(
+      'is_ascending',
+      'true',
+    )
+
+    const response =
+      await apiClient.get<
+        ApiResponse<
+          PagedResult<
+            WaybillTemplateSummary
+          >
+        >
+      >(
+        `${WAYBILL_TEMPLATE_API_PATH}?${params.toString()}`,
+      )
+
+    const result =
+      ensureSuccess(
+        response,
+        'دریافت قالبهای فعال بارنامه ناموفق بود.',
+      )
+
+    const activeSummaries =
+      result.items.filter(
+        (template) =>
+          template.is_active,
+      )
+
+    const templates =
+      await Promise.all(
+        activeSummaries.map(
+          (template) =>
+            getWaybillTemplateById(
+              template.id,
+            ),
+        ),
+      )
+
+    return templates.filter(
+      (
+        template,
+      ): template is WaybillTemplate =>
+        template !== null &&
+        template.is_active,
+    )
+  } catch (error) {
+    throwNormalizedApiError(
+      error,
+      'دریافت قالبهای فعال بارنامه ناموفق بود.',
+    )
+  }
+}

@@ -45,7 +45,7 @@ import {
 import {
   getActiveWaybillTemplates,
   getWaybillTemplateById,
-} from '@/modules/waybill-templates/mocks/waybillTemplateRepository.mock'
+} from '@/modules/waybill-templates/api/waybill-template.api'
 
 import type {
   WaybillTemplate,
@@ -55,7 +55,7 @@ import {
   createWaybill,
   getWaybillById,
   updateWaybill,
-} from '../mocks/waybillRepository.mock'
+} from '../api/waybill.api'
 
 import {
   waybillPriorities,
@@ -545,6 +545,14 @@ function WaybillEditorPage() {
           setDynamicValues(
             values,
           )
+        } catch (error) {
+          if (active) {
+            notify.error(
+              error instanceof Error
+                ? error.message
+                : 'دریافت اطلاعات بارنامه ناموفق بود.',
+            )
+          }
         } finally {
           if (active) {
             setLoading(false)
@@ -833,17 +841,22 @@ function WaybillEditorPage() {
         null,
 
       attributes:
-        selectedTemplate.fields.map(
-          (field) => ({
-            field_id:
-              field.field_id,
+        selectedTemplate.fields
+          .filter(
+            (field) =>
+              field.is_active,
+          )
+          .map(
+            (field) => ({
+              field_id:
+                field.field_id,
 
-            value:
-              dynamicValues[
-                field.field_id
-              ] ?? null,
-          }),
-        ),
+              value:
+                dynamicValues[
+                  field.field_id
+                ] ?? null,
+            }),
+          ),
     }
 
 
@@ -874,6 +887,16 @@ function WaybillEditorPage() {
 
       navigate(
         '/waybills',
+      )
+    } catch (error) {
+      notify.error(
+        error instanceof Error
+          ? error.message
+          : (
+              isEdit
+                ? 'ویرایش بارنامه انجام نشد.'
+                : 'ثبت بارنامه انجام نشد.'
+            ),
       )
     } finally {
       setSaving(false)
