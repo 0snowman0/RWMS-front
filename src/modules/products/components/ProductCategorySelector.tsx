@@ -10,9 +10,9 @@ import {
   X,
 } from 'lucide-react'
 
-import {
-  mockCategories,
-} from '@/modules/categories/mocks/categories.mock'
+import type {
+  Category,
+} from '@/modules/categories/types/category.types'
 
 
 type CategoryFilter =
@@ -22,6 +22,8 @@ type CategoryFilter =
 
 
 interface ProductCategorySelectorProps {
+  categories: Category[]
+
   selectedIds: number[]
 
   onChange: (
@@ -31,6 +33,7 @@ interface ProductCategorySelectorProps {
 
 
 export function ProductCategorySelector({
+  categories,
   selectedIds,
   onChange,
 }: ProductCategorySelectorProps) {
@@ -52,7 +55,7 @@ export function ProductCategorySelector({
   const selectedCategories =
     useMemo(
       () =>
-        mockCategories.filter(
+        categories.filter(
           (category) =>
             selectedIds.includes(
               category.id,
@@ -72,7 +75,7 @@ export function ProductCategorySelector({
               'fa',
             )
 
-        return mockCategories.filter(
+        return categories.filter(
           (category) => {
             const selected =
               selectedIds.includes(
@@ -286,7 +289,7 @@ export function ProductCategorySelector({
               {' '}
               (
               {
-                mockCategories.length
+                categories.length
               }
               )
             </button>
@@ -336,7 +339,7 @@ export function ProductCategorySelector({
               {' '}
               (
               {
-                mockCategories.length -
+                categories.length -
                 selectedIds.length
               }
               )

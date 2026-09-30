@@ -35,10 +35,12 @@ import {
   notify,
 } from '@/shared/notifications'
 
+
+
 import {
   deleteProduct,
   listProducts,
-} from '../mocks/productRepository.mock'
+} from '../api/product.api'
 
 import type {
   Product,
@@ -307,6 +309,12 @@ function ProductsPage() {
       )
 
       await load()
+    } catch (error) {
+      notify.error(
+        error instanceof Error
+          ? error.message
+          : 'حذف کالا انجام نشد.',
+      )
     } finally {
       setDeleting(false)
     }

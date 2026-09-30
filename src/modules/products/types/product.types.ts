@@ -31,8 +31,9 @@ export interface Product {
 
 
 export interface ProductAttributeValue {
+  category_id: number
   field_id: string
-  value: unknown
+  value: unknown | null
 }
 
 

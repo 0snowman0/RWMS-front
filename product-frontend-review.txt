@@ -1,0 +1,4351 @@
+============================================================
+RWMS PRODUCT FRONTEND REVIEW
+FOR REAL API INTEGRATION
+============================================================
+
+
+============================================================
+PRODUCT MODULE FILE TREE
+============================================================
+src\modules\products\components\ProductCategorySelector.tsx
+src\modules\products\components\ProductDynamicFieldsForm.tsx
+src\modules\products\index.ts
+src\modules\products\mocks\productRepository.mock.ts
+src\modules\products\pages\ProductEditorPage.tsx
+src\modules\products\pages\ProductsPage.tsx
+src\modules\products\routes\index.ts
+src\modules\products\routes\products.routes.tsx
+src\modules\products\types\index.ts
+src\modules\products\types\product.types.ts
+
+============================================================
+FILE: E:\Computer\proj\RWMS_Front\src\modules\products\components\ProductCategorySelector.tsx
+============================================================
+   1 | import {
+   2 |   useMemo,
+   3 |   useState,
+   4 | } from 'react'
+   5 | 
+   6 | import {
+   7 |   Check,
+   8 |   Layers3,
+   9 |   Search,
+  10 |   X,
+  11 | } from 'lucide-react'
+  12 | 
+  13 | import {
+  14 |   mockCategories,
+  15 | } from '@/modules/categories/mocks/categories.mock'
+  16 | 
+  17 | 
+  18 | type CategoryFilter =
+  19 |   | 'all'
+  20 |   | 'selected'
+  21 |   | 'unselected'
+  22 | 
+  23 | 
+  24 | interface ProductCategorySelectorProps {
+  25 |   selectedIds: number[]
+  26 | 
+  27 |   onChange: (
+  28 |     ids: number[],
+  29 |   ) => void
+  30 | }
+  31 | 
+  32 | 
+  33 | export function ProductCategorySelector({
+  34 |   selectedIds,
+  35 |   onChange,
+  36 | }: ProductCategorySelectorProps) {
+  37 |   const [
+  38 |     search,
+  39 |     setSearch,
+  40 |   ] = useState('')
+  41 | 
+  42 | 
+  43 |   const [
+  44 |     filter,
+  45 |     setFilter,
+  46 |   ] =
+  47 |     useState<CategoryFilter>(
+  48 |       'all',
+  49 |     )
+  50 | 
+  51 | 
+  52 |   const selectedCategories =
+  53 |     useMemo(
+  54 |       () =>
+  55 |         mockCategories.filter(
+  56 |           (category) =>
+  57 |             selectedIds.includes(
+  58 |               category.id,
+  59 |             ),
+  60 |         ),
+  61 |       [selectedIds],
+  62 |     )
+  63 | 
+  64 | 
+  65 |   const visibleCategories =
+  66 |     useMemo(
+  67 |       () => {
+  68 |         const normalizedSearch =
+  69 |           search
+  70 |             .trim()
+  71 |             .toLocaleLowerCase(
+  72 |               'fa',
+  73 |             )
+  74 | 
+  75 |         return mockCategories.filter(
+  76 |           (category) => {
+  77 |             const selected =
+  78 |               selectedIds.includes(
+  79 |                 category.id,
+  80 |               )
+  81 | 
+  82 |             if (
+  83 |               filter ===
+  84 |                 'selected' &&
+  85 |               !selected
+  86 |             ) {
+  87 |               return false
+  88 |             }
+  89 | 
+  90 |             if (
+  91 |               filter ===
+  92 |                 'unselected' &&
+  93 |               selected
+  94 |             ) {
+  95 |               return false
+  96 |             }
+  97 | 
+  98 |             if (
+  99 |               !normalizedSearch
+ 100 |             ) {
+ 101 |               return true
+ 102 |             }
+ 103 | 
+ 104 |             return (
+ 105 |               category.name
+ 106 |                 .toLocaleLowerCase(
+ 107 |                   'fa',
+ 108 |                 )
+ 109 |                 .includes(
+ 110 |                   normalizedSearch,
+ 111 |                 ) ||
+ 112 |               (
+ 113 |                 category.description ??
+ 114 |                 ''
+ 115 |               )
+ 116 |                 .toLocaleLowerCase(
+ 117 |                   'fa',
+ 118 |                 )
+ 119 |                 .includes(
+ 120 |                   normalizedSearch,
+ 121 |                 )
+ 122 |             )
+ 123 |           },
+ 124 |         )
+ 125 |       },
+ 126 |       [
+ 127 |         filter,
+ 128 |         search,
+ 129 |         selectedIds,
+ 130 |       ],
+ 131 |     )
+ 132 | 
+ 133 | 
+ 134 |   function toggle(
+ 135 |     categoryId: number,
+ 136 |   ) {
+ 137 |     if (
+ 138 |       selectedIds.includes(
+ 139 |         categoryId,
+ 140 |       )
+ 141 |     ) {
+ 142 |       onChange(
+ 143 |         selectedIds.filter(
+ 144 |           (id) =>
+ 145 |             id !== categoryId,
+ 146 |         ),
+ 147 |       )
+ 148 | 
+ 149 |       return
+ 150 |     }
+ 151 | 
+ 152 |     onChange([
+ 153 |       ...selectedIds,
+ 154 |       categoryId,
+ 155 |     ])
+ 156 |   }
+ 157 | 
+ 158 | 
+ 159 |   function removeSelected(
+ 160 |     categoryId: number,
+ 161 |   ) {
+ 162 |     onChange(
+ 163 |       selectedIds.filter(
+ 164 |         (id) =>
+ 165 |           id !== categoryId,
+ 166 |       ),
+ 167 |     )
+ 168 |   }
+ 169 | 
+ 170 | 
+ 171 |   return (
+ 172 |     <section className="rounded-2xl border border-border bg-surface">
+ 173 |       <div className="border-b border-border p-5">
+ 174 |         <div className="flex items-start gap-3">
+ 175 |           <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
+ 176 |             <Layers3
+ 177 |               size={20}
+ 178 |             />
+ 179 |           </div>
+ 180 | 
+ 181 |           <div className="min-w-0 flex-1">
+ 182 |             <div className="flex flex-wrap items-center justify-between gap-3">
+ 183 |               <div>
+ 184 |                 <h2 className="font-semibold text-foreground">
+ 185 |                   دستهبندیهای کالا
+ 186 |                 </h2>
+ 187 | 
+ 188 |                 <p className="mt-1 text-sm leading-6 text-muted-foreground">
+ 189 |                   یک یا چند دستهبندی را انتخاب کنید. مشخصات هر دسته به فرم کالا اضافه میشود.
+ 190 |                 </p>
+ 191 |               </div>
+ 192 | 
+ 193 |               <div className="rounded-lg bg-primary-soft px-3 py-1.5 text-xs font-medium text-primary">
+ 194 |                 {
+ 195 |                   selectedIds.length
+ 196 |                 }{' '}
+ 197 |                 انتخابشده
+ 198 |               </div>
+ 199 |             </div>
+ 200 |           </div>
+ 201 |         </div>
+ 202 | 
+ 203 | 
+ 204 |         {selectedCategories.length >
+ 205 |           0 && (
+ 206 |           <div className="mt-5 rounded-xl border border-border bg-surface-muted/35 p-3">
+ 207 |             <div className="mb-2 text-xs font-medium text-muted-foreground">
+ 208 |               دستهبندیهای انتخابشده
+ 209 |             </div>
+ 210 | 
+ 211 |             <div className="flex flex-wrap gap-2">
+ 212 |               {selectedCategories.map(
+ 213 |                 (category) => (
+ 214 |                   <span
+ 215 |                     key={
+ 216 |                       category.id
+ 217 |                     }
+ 218 |                     className="inline-flex items-center gap-2 rounded-lg bg-primary-soft px-2.5 py-1.5 text-xs font-medium text-primary"
+ 219 |                   >
+ 220 |                     {
+ 221 |                       category.name
+ 222 |                     }
+ 223 | 
+ 224 |                     <button
+ 225 |                       type="button"
+ 226 |                       title="حذف انتخاب"
+ 227 |                       className="rounded-md p-0.5 transition hover:bg-primary/10"
+ 228 |                       onClick={() =>
+ 229 |                         removeSelected(
+ 230 |                           category.id,
+ 231 |                         )
+ 232 |                       }
+ 233 |                     >
+ 234 |                       <X
+ 235 |                         size={13}
+ 236 |                       />
+ 237 |                     </button>
+ 238 |                   </span>
+ 239 |                 ),
+ 240 |               )}
+ 241 |             </div>
+ 242 |           </div>
+ 243 |         )}
+ 244 | 
+ 245 | 
+ 246 |         <div className="mt-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+ 247 |           <div className="relative w-full lg:max-w-md">
+ 248 |             <Search
+ 249 |               size={17}
+ 250 |               className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+ 251 |             />
+ 252 | 
+ 253 |             <input
+ 254 |               type="search"
+ 255 |               value={search}
+ 256 |               placeholder="جستجو در دستهبندیها..."
+ 257 |               className="w-full rounded-xl border border-border bg-surface py-2.5 pr-10 pl-3 text-sm text-foreground outline-none transition placeholder:text-placeholder focus:border-primary focus:ring-2 focus:ring-primary/15"
+ 258 |               onChange={(
+ 259 |                 event,
+ 260 |               ) =>
+ 261 |                 setSearch(
+ 262 |                   event.target
+ 263 |                     .value,
+ 264 |                 )
+ 265 |               }
+ 266 |             />
+ 267 |           </div>
+ 268 | 
+ 269 | 
+ 270 |           <div className="flex flex-wrap gap-2">
+ 271 |             <button
+ 272 |               type="button"
+ 273 |               className={[
+ 274 |                 'rounded-lg border px-3 py-2 text-xs font-medium transition',
+ 275 |                 filter === 'all'
+ 276 |                   ? 'border-primary bg-primary-soft text-primary'
+ 277 |                   : 'border-border bg-surface text-muted-foreground hover:bg-surface-muted',
+ 278 |               ].join(' ')}
+ 279 |               onClick={() =>
+ 280 |                 setFilter(
+ 281 |                   'all',
+ 282 |                 )
+ 283 |               }
+ 284 |             >
+ 285 |               همه
+ 286 |               {' '}
+ 287 |               (
+ 288 |               {
+ 289 |                 mockCategories.length
+ 290 |               }
+ 291 |               )
+ 292 |             </button>
+ 293 | 
+ 294 | 
+ 295 |             <button
+ 296 |               type="button"
+ 297 |               className={[
+ 298 |                 'rounded-lg border px-3 py-2 text-xs font-medium transition',
+ 299 |                 filter ===
+ 300 |                 'selected'
+ 301 |                   ? 'border-primary bg-primary-soft text-primary'
+ 302 |                   : 'border-border bg-surface text-muted-foreground hover:bg-surface-muted',
+ 303 |               ].join(' ')}
+ 304 |               onClick={() =>
+ 305 |                 setFilter(
+ 306 |                   'selected',
+ 307 |                 )
+ 308 |               }
+ 309 |             >
+ 310 |               انتخابشدهها
+ 311 |               {' '}
+ 312 |               (
+ 313 |               {
+ 314 |                 selectedIds.length
+ 315 |               }
+ 316 |               )
+ 317 |             </button>
+ 318 | 
+ 319 | 
+ 320 |             <button
+ 321 |               type="button"
+ 322 |               className={[
+ 323 |                 'rounded-lg border px-3 py-2 text-xs font-medium transition',
+ 324 |                 filter ===
+ 325 |                 'unselected'
+ 326 |                   ? 'border-primary bg-primary-soft text-primary'
+ 327 |                   : 'border-border bg-surface text-muted-foreground hover:bg-surface-muted',
+ 328 |               ].join(' ')}
+ 329 |               onClick={() =>
+ 330 |                 setFilter(
+ 331 |                   'unselected',
+ 332 |                 )
+ 333 |               }
+ 334 |             >
+ 335 |               انتخابنشدهها
+ 336 |               {' '}
+ 337 |               (
+ 338 |               {
+ 339 |                 mockCategories.length -
+ 340 |                 selectedIds.length
+ 341 |               }
+ 342 |               )
+ 343 |             </button>
+ 344 |           </div>
+ 345 |         </div>
+ 346 |       </div>
+ 347 | 
+ 348 | 
+ 349 |       <div className="p-4">
+ 350 |         <div className="max-h-[420px] overflow-y-auto overscroll-contain pl-1">
+ 351 |           {visibleCategories.length ===
+ 352 |           0 ? (
+ 353 |             <div className="flex min-h-40 items-center justify-center rounded-xl border border-dashed border-border p-6 text-center">
+ 354 |               <div>
+ 355 |                 <p className="font-medium text-foreground">
+ 356 |                   دستهبندیای پیدا نشد
+ 357 |                 </p>
+ 358 | 
+ 359 |                 <p className="mt-2 text-sm text-muted-foreground">
+ 360 |                   عبارت جستجو یا فیلتر نمایش را تغییر دهید.
+ 361 |                 </p>
+ 362 |               </div>
+ 363 |             </div>
+ 364 |           ) : (
+ 365 |             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+ 366 |               {visibleCategories.map(
+ 367 |                 (category) => {
+ 368 |                   const selected =
+ 369 |                     selectedIds.includes(
+ 370 |                       category.id,
+ 371 |                     )
+ 372 | 
+ 373 |                   const activeFields =
+ 374 |                     category.fields.filter(
+ 375 |                       (field) =>
+ 376 |                         field.is_active,
+ 377 |                     )
+ 378 | 
+ 379 |                   const requiredFields =
+ 380 |                     activeFields.filter(
+ 381 |                       (field) =>
+ 382 |                         field.required,
+ 383 |                     ).length
+ 384 | 
+ 385 |                   return (
+ 386 |                     <button
+ 387 |                       key={
+ 388 |                         category.id
+ 389 |                       }
+ 390 |                       type="button"
+ 391 |                       onClick={() =>
+ 392 |                         toggle(
+ 393 |                           category.id,
+ 394 |                         )
+ 395 |                       }
+ 396 |                       className={[
+ 397 |                         'relative min-h-[126px] rounded-xl border p-4 text-right transition',
+ 398 |                         'focus:outline-none focus:ring-2 focus:ring-primary/25',
+ 399 |                         selected
+ 400 |                           ? 'border-primary bg-primary-soft/60'
+ 401 |                           : 'border-border bg-surface hover:border-border-strong hover:bg-surface-muted/40',
+ 402 |                       ].join(' ')}
+ 403 |                     >
+ 404 |                       <div className="flex items-start gap-3">
+ 405 |                         <div
+ 406 |                           className={[
+ 407 |                             'mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-md border transition',
+ 408 |                             selected
+ 409 |                               ? 'border-primary bg-primary text-white'
+ 410 |                               : 'border-border-strong bg-surface',
+ 411 |                           ].join(' ')}
+ 412 |                         >
+ 413 |                           {selected && (
+ 414 |                             <Check
+ 415 |                               size={15}
+ 416 |                             />
+ 417 |                           )}
+ 418 |                         </div>
+ 419 | 
+ 420 | 
+ 421 |                         <div className="min-w-0 flex-1">
+ 422 |                           <div className="font-medium text-foreground">
+ 423 |                             {
+ 424 |                               category.name
+ 425 |                             }
+ 426 |                           </div>
+ 427 | 
+ 428 |                           <div className="mt-2 flex flex-wrap gap-1.5">
+ 429 |                             <span className="rounded-md bg-surface-muted px-2 py-1 text-[11px] text-muted-foreground">
+ 430 |                               {
+ 431 |                                 activeFields.length
+ 432 |                               }{' '}
+ 433 |                               مشخصه
+ 434 |                             </span>
+ 435 | 
+ 436 |                             {requiredFields >
+ 437 |                               0 && (
+ 438 |                               <span className="rounded-md bg-warning-soft px-2 py-1 text-[11px] text-warning">
+ 439 |                                 {
+ 440 |                                   requiredFields
+ 441 |                                 }{' '}
+ 442 |                                 اجباری
+ 443 |                               </span>
+ 444 |                             )}
+ 445 |                           </div>
+ 446 | 
+ 447 |                           {category.description && (
+ 448 |                             <p className="mt-2 line-clamp-2 text-xs leading-5 text-muted-foreground">
+ 449 |                               {
+ 450 |                                 category.description
+ 451 |                               }
+ 452 |                             </p>
+ 453 |                           )}
+ 454 |                         </div>
+ 455 |                       </div>
+ 456 |                     </button>
+ 457 |                   )
+ 458 |                 },
+ 459 |               )}
+ 460 |             </div>
+ 461 |           )}
+ 462 |         </div>
+ 463 | 
+ 464 | 
+ 465 |         <div className="mt-3 flex items-center justify-between border-t border-border pt-3 text-xs text-muted-foreground">
+ 466 |           <span>
+ 467 |             نمایش{' '}
+ 468 |             {
+ 469 |               visibleCategories.length
+ 470 |             }{' '}
+ 471 |             دستهبندی
+ 472 |           </span>
+ 473 | 
+ 474 |           <span>
+ 475 |             برای مشاهده تعداد زیاد دستهبندیها از اسکرول همین بخش استفاده کنید.
+ 476 |           </span>
+ 477 |         </div>
+ 478 |       </div>
+ 479 |     </section>
+ 480 |   )
+ 481 | }
+
+============================================================
+FILE: E:\Computer\proj\RWMS_Front\src\modules\products\components\ProductDynamicFieldsForm.tsx
+============================================================
+   1 | import {
+   2 |   Boxes,
+   3 |   Info,
+   4 | } from 'lucide-react'
+   5 | 
+   6 | import type {
+   7 |   ProductDynamicField,
+   8 | } from '../types'
+   9 | 
+  10 | 
+  11 | export type ProductFormValues =
+  12 |   Record<string, unknown>
+  13 | 
+  14 | 
+  15 | interface ProductDynamicFieldsFormProps {
+  16 |   fields: ProductDynamicField[]
+  17 | 
+  18 |   values: ProductFormValues
+  19 | 
+  20 |   errors?: Record<
+  21 |     string,
+  22 |     string
+  23 |   >
+  24 | 
+  25 |   onChange: (
+  26 |     fieldId: string,
+  27 |     value: unknown,
+  28 |   ) => void
+  29 | }
+  30 | 
+  31 | 
+  32 | function asText(
+  33 |   value: unknown,
+  34 | ): string {
+  35 |   if (
+  36 |     value === null ||
+  37 |     value === undefined
+  38 |   ) {
+  39 |     return ''
+  40 |   }
+  41 | 
+  42 |   if (
+  43 |     typeof value ===
+  44 |       'string' ||
+  45 |     typeof value ===
+  46 |       'number'
+  47 |   ) {
+  48 |     return String(value)
+  49 |   }
+  50 | 
+  51 |   return ''
+  52 | }
+  53 | 
+  54 | 
+  55 | export function ProductDynamicFieldsForm({
+  56 |   fields,
+  57 |   values,
+  58 |   errors = {},
+  59 |   onChange,
+  60 | }: ProductDynamicFieldsFormProps) {
+  61 |   const groups =
+  62 |     fields.reduce<
+  63 |       Record<
+  64 |         string,
+  65 |         {
+  66 |           categoryId: number
+  67 |           categoryName: string
+  68 |           fields: ProductDynamicField[]
+  69 |         }
+  70 |       >
+  71 |     >(
+  72 |       (
+  73 |         result,
+  74 |         field,
+  75 |       ) => {
+  76 |         const key =
+  77 |           String(
+  78 |             field.category_id,
+  79 |           )
+  80 | 
+  81 |         if (!result[key]) {
+  82 |           result[key] = {
+  83 |             categoryId:
+  84 |               field.category_id,
+  85 | 
+  86 |             categoryName:
+  87 |               field.category_name,
+  88 | 
+  89 |             fields: [],
+  90 |           }
+  91 |         }
+  92 | 
+  93 |         result[key].fields.push(
+  94 |           field,
+  95 |         )
+  96 | 
+  97 |         return result
+  98 |       },
+  99 |       {},
+ 100 |     )
+ 101 | 
+ 102 | 
+ 103 |   const groupList =
+ 104 |     Object.values(
+ 105 |       groups,
+ 106 |     )
+ 107 | 
+ 108 | 
+ 109 |   if (
+ 110 |     fields.length === 0
+ 111 |   ) {
+ 112 |     return (
+ 113 |       <section className="rounded-2xl border border-border bg-surface p-5">
+ 114 |         <div className="flex min-h-44 flex-col items-center justify-center rounded-xl border border-dashed border-border px-6 py-8 text-center">
+ 115 |           <div className="flex size-12 items-center justify-center rounded-2xl bg-primary-soft text-primary">
+ 116 |             <Boxes
+ 117 |               size={22}
+ 118 |             />
+ 119 |           </div>
+ 120 | 
+ 121 |           <p className="mt-4 font-medium text-foreground">
+ 122 |             هنوز مشخصاتی برای کالا نمایش داده نمی‌شود
+ 123 |           </p>
+ 124 | 
+ 125 |           <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
+ 126 |             با انتخاب دسته‌بندی، فیلدهای مربوط به همان دسته‌بندی در این قسمت ساخته می‌شوند.
+ 127 |           </p>
+ 128 |         </div>
+ 129 |       </section>
+ 130 |     )
+ 131 |   }
+ 132 | 
+ 133 | 
+ 134 |   function renderControl(
+ 135 |     field: ProductDynamicField,
+ 136 |   ) {
+ 137 |     const value =
+ 138 |       values[
+ 139 |         field.field_id
+ 140 |       ]
+ 141 | 
+ 142 |     const commonClass =
+ 143 |       [
+ 144 |         'w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm text-foreground',
+ 145 |         'outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15',
+ 146 |         'disabled:cursor-not-allowed disabled:bg-surface-muted disabled:text-muted-foreground',
+ 147 |       ].join(' ')
+ 148 | 
+ 149 | 
+ 150 |     if (
+ 151 |       field.auto_generate
+ 152 |     ) {
+ 153 |       return (
+ 154 |         <input
+ 155 |           className={
+ 156 |             commonClass
+ 157 |           }
+ 158 |           value="توسط سیستم تولید می‌شود"
+ 159 |           disabled
+ 160 |           readOnly
+ 161 |         />
+ 162 |       )
+ 163 |     }
+ 164 | 
+ 165 | 
+ 166 |     if (
+ 167 |       field.field_type ===
+ 168 |       'boolean'
+ 169 |     ) {
+ 170 |       const boolValue =
+ 171 |         value === true
+ 172 |           ? 'true'
+ 173 |           : value === false
+ 174 |             ? 'false'
+ 175 |             : ''
+ 176 | 
+ 177 |       return (
+ 178 |         <select
+ 179 |           className={
+ 180 |             commonClass
+ 181 |           }
+ 182 |           value={
+ 183 |             boolValue
+ 184 |           }
+ 185 |           disabled={
+ 186 |             field.readonly
+ 187 |           }
+ 188 |           onChange={(
+ 189 |             event,
+ 190 |           ) => {
+ 191 |             const next =
+ 192 |               event.target
+ 193 |                 .value
+ 194 | 
+ 195 |             onChange(
+ 196 |               field.field_id,
+ 197 |               next === ''
+ 198 |                 ? null
+ 199 |                 : next ===
+ 200 |                     'true',
+ 201 |             )
+ 202 |           }}
+ 203 |         >
+ 204 |           <option value="">
+ 205 |             انتخاب کنید
+ 206 |           </option>
+ 207 | 
+ 208 |           <option value="true">
+ 209 |             بله
+ 210 |           </option>
+ 211 | 
+ 212 |           <option value="false">
+ 213 |             خیر
+ 214 |           </option>
+ 215 |         </select>
+ 216 |       )
+ 217 |     }
+ 218 | 
+ 219 | 
+ 220 |     if (
+ 221 |       field.field_type ===
+ 222 |       'select'
+ 223 |     ) {
+ 224 |       return (
+ 225 |         <select
+ 226 |           className={
+ 227 |             commonClass
+ 228 |           }
+ 229 |           value={
+ 230 |             asText(
+ 231 |               value,
+ 232 |             )
+ 233 |           }
+ 234 |           disabled={
+ 235 |             field.readonly
+ 236 |           }
+ 237 |           onChange={(
+ 238 |             event,
+ 239 |           ) =>
+ 240 |             onChange(
+ 241 |               field.field_id,
+ 242 |               event.target
+ 243 |                 .value ||
+ 244 |                 null,
+ 245 |             )
+ 246 |           }
+ 247 |         >
+ 248 |           <option value="">
+ 249 |             انتخاب کنید
+ 250 |           </option>
+ 251 | 
+ 252 |           {field.options.map(
+ 253 |             (option) => (
+ 254 |               <option
+ 255 |                 key={
+ 256 |                   option.value
+ 257 |                 }
+ 258 |                 value={
+ 259 |                   option.value
+ 260 |                 }
+ 261 |               >
+ 262 |                 {
+ 263 |                   option.label
+ 264 |                 }
+ 265 |               </option>
+ 266 |             ),
+ 267 |           )}
+ 268 |         </select>
+ 269 |       )
+ 270 |     }
+ 271 | 
+ 272 | 
+ 273 |     if (
+ 274 |       field.field_type ===
+ 275 |       'multi_select'
+ 276 |     ) {
+ 277 |       const selected =
+ 278 |         Array.isArray(value)
+ 279 |           ? value.filter(
+ 280 |               (
+ 281 |                 item,
+ 282 |               ): item is string =>
+ 283 |                 typeof item ===
+ 284 |                 'string',
+ 285 |             )
+ 286 |           : []
+ 287 | 
+ 288 |       return (
+ 289 |         <div className="grid gap-2 rounded-xl border border-border bg-surface-muted/25 p-3 sm:grid-cols-2">
+ 290 |           {field.options.map(
+ 291 |             (option) => {
+ 292 |               const checked =
+ 293 |                 selected.includes(
+ 294 |                   option.value,
+ 295 |                 )
+ 296 | 
+ 297 |               return (
+ 298 |                 <label
+ 299 |                   key={
+ 300 |                     option.value
+ 301 |                   }
+ 302 |                   className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 text-sm text-foreground hover:bg-surface-muted"
+ 303 |                 >
+ 304 |                   <input
+ 305 |                     type="checkbox"
+ 306 |                     checked={
+ 307 |                       checked
+ 308 |                     }
+ 309 |                     disabled={
+ 310 |                       field.readonly
+ 311 |                     }
+ 312 |                     onChange={(
+ 313 |                       event,
+ 314 |                     ) => {
+ 315 |                       const next =
+ 316 |                         event
+ 317 |                           .target
+ 318 |                           .checked
+ 319 |                           ? [
+ 320 |                               ...selected,
+ 321 |                               option.value,
+ 322 |                             ]
+ 323 |                           : selected.filter(
+ 324 |                               (
+ 325 |                                 item,
+ 326 |                               ) =>
+ 327 |                                 item !==
+ 328 |                                 option.value,
+ 329 |                             )
+ 330 | 
+ 331 |                       onChange(
+ 332 |                         field.field_id,
+ 333 |                         next,
+ 334 |                       )
+ 335 |                     }}
+ 336 |                   />
+ 337 | 
+ 338 |                   {
+ 339 |                     option.label
+ 340 |                   }
+ 341 |                 </label>
+ 342 |               )
+ 343 |             },
+ 344 |           )}
+ 345 |         </div>
+ 346 |       )
+ 347 |     }
+ 348 | 
+ 349 | 
+ 350 |     if (
+ 351 |       field.field_type ===
+ 352 |       'date'
+ 353 |     ) {
+ 354 |       return (
+ 355 |         <input
+ 356 |           className={
+ 357 |             commonClass
+ 358 |           }
+ 359 |           type="date"
+ 360 |           value={
+ 361 |             asText(
+ 362 |               value,
+ 363 |             ).slice(
+ 364 |               0,
+ 365 |               10,
+ 366 |             )
+ 367 |           }
+ 368 |           disabled={
+ 369 |             field.readonly
+ 370 |           }
+ 371 |           onChange={(
+ 372 |             event,
+ 373 |           ) =>
+ 374 |             onChange(
+ 375 |               field.field_id,
+ 376 |               event.target
+ 377 |                 .value ||
+ 378 |                 null,
+ 379 |             )
+ 380 |           }
+ 381 |         />
+ 382 |       )
+ 383 |     }
+ 384 | 
+ 385 | 
+ 386 |     if (
+ 387 |       field.field_type ===
+ 388 |       'datetime'
+ 389 |     ) {
+ 390 |       return (
+ 391 |         <input
+ 392 |           className={
+ 393 |             commonClass
+ 394 |           }
+ 395 |           type="datetime-local"
+ 396 |           value={
+ 397 |             asText(
+ 398 |               value,
+ 399 |             ).slice(
+ 400 |               0,
+ 401 |               16,
+ 402 |             )
+ 403 |           }
+ 404 |           disabled={
+ 405 |             field.readonly
+ 406 |           }
+ 407 |           onChange={(
+ 408 |             event,
+ 409 |           ) =>
+ 410 |             onChange(
+ 411 |               field.field_id,
+ 412 |               event.target
+ 413 |                 .value ||
+ 414 |                 null,
+ 415 |             )
+ 416 |           }
+ 417 |         />
+ 418 |       )
+ 419 |     }
+ 420 | 
+ 421 | 
+ 422 |     if (
+ 423 |       field.field_type ===
+ 424 |         'integer' ||
+ 425 |       field.field_type ===
+ 426 |         'decimal'
+ 427 |     ) {
+ 428 |       return (
+ 429 |         <div className="flex items-center gap-2">
+ 430 |           <input
+ 431 |             className={
+ 432 |               commonClass
+ 433 |             }
+ 434 |             type="number"
+ 435 |             dir="ltr"
+ 436 |             value={
+ 437 |               asText(
+ 438 |                 value,
+ 439 |               )
+ 440 |             }
+ 441 |             min={
+ 442 |               field.min_value !==
+ 443 |                 null &&
+ 444 |               field.min_value !==
+ 445 |                 undefined
+ 446 |                 ? String(
+ 447 |                     field.min_value,
+ 448 |                   )
+ 449 |                 : undefined
+ 450 |             }
+ 451 |             max={
+ 452 |               field.max_value !==
+ 453 |                 null &&
+ 454 |               field.max_value !==
+ 455 |                 undefined
+ 456 |                 ? String(
+ 457 |                     field.max_value,
+ 458 |                   )
+ 459 |                 : undefined
+ 460 |             }
+ 461 |             step={
+ 462 |               field.field_type ===
+ 463 |               'integer'
+ 464 |                 ? '1'
+ 465 |                 : field.decimal_places !==
+ 466 |                       null &&
+ 467 |                     field.decimal_places !==
+ 468 |                       undefined
+ 469 |                   ? String(
+ 470 |                       Math.pow(
+ 471 |                         10,
+ 472 |                         -field.decimal_places,
+ 473 |                       ),
+ 474 |                     )
+ 475 |                   : 'any'
+ 476 |             }
+ 477 |             placeholder={
+ 478 |               field.placeholder ??
+ 479 |               undefined
+ 480 |             }
+ 481 |             disabled={
+ 482 |               field.readonly
+ 483 |             }
+ 484 |             onChange={(
+ 485 |               event,
+ 486 |             ) => {
+ 487 |               const raw =
+ 488 |                 event.target
+ 489 |                   .value
+ 490 | 
+ 491 |               if (raw === '') {
+ 492 |                 onChange(
+ 493 |                   field.field_id,
+ 494 |                   null,
+ 495 |                 )
+ 496 | 
+ 497 |                 return
+ 498 |               }
+ 499 | 
+ 500 |               const number =
+ 501 |                 field.field_type ===
+ 502 |                 'integer'
+ 503 |                   ? Number.parseInt(
+ 504 |                       raw,
+ 505 |                       10,
+ 506 |                     )
+ 507 |                   : Number.parseFloat(
+ 508 |                       raw,
+ 509 |                     )
+ 510 | 
+ 511 |               onChange(
+ 512 |                 field.field_id,
+ 513 |                 Number.isNaN(
+ 514 |                   number,
+ 515 |                 )
+ 516 |                   ? null
+ 517 |                   : number,
+ 518 |               )
+ 519 |             }}
+ 520 |           />
+ 521 | 
+ 522 |           {field.unit && (
+ 523 |             <span className="shrink-0 rounded-lg bg-surface-muted px-3 py-2.5 text-sm font-medium text-muted-foreground">
+ 524 |               {field.unit}
+ 525 |             </span>
+ 526 |           )}
+ 527 |         </div>
+ 528 |       )
+ 529 |     }
+ 530 | 
+ 531 | 
+ 532 |     return (
+ 533 |       <div className="flex items-center gap-2">
+ 534 |         <input
+ 535 |           className={
+ 536 |             commonClass
+ 537 |           }
+ 538 |           type="text"
+ 539 |           value={
+ 540 |             asText(
+ 541 |               value,
+ 542 |             )
+ 543 |           }
+ 544 |           minLength={
+ 545 |             field.min_length ??
+ 546 |             undefined
+ 547 |           }
+ 548 |           maxLength={
+ 549 |             field.max_length ??
+ 550 |             undefined
+ 551 |           }
+ 552 |           pattern={
+ 553 |             field.regex ??
+ 554 |             undefined
+ 555 |           }
+ 556 |           placeholder={
+ 557 |             field.placeholder ??
+ 558 |             undefined
+ 559 |           }
+ 560 |           disabled={
+ 561 |             field.readonly
+ 562 |           }
+ 563 |           onChange={(
+ 564 |             event,
+ 565 |           ) =>
+ 566 |             onChange(
+ 567 |               field.field_id,
+ 568 |               event.target
+ 569 |                 .value,
+ 570 |             )
+ 571 |           }
+ 572 |         />
+ 573 | 
+ 574 |         {field.unit && (
+ 575 |           <span className="shrink-0 rounded-lg bg-surface-muted px-3 py-2.5 text-sm font-medium text-muted-foreground">
+ 576 |             {field.unit}
+ 577 |           </span>
+ 578 |         )}
+ 579 |       </div>
+ 580 |     )
+ 581 |   }
+ 582 | 
+ 583 | 
+ 584 |   return (
+ 585 |     <div className="space-y-5">
+ 586 |       <div className="flex gap-3 rounded-xl border border-info/20 bg-info-soft p-4">
+ 587 |         <Info
+ 588 |           size={18}
+ 589 |           className="mt-0.5 shrink-0 text-info"
+ 590 |         />
+ 591 | 
+ 592 |         <p className="text-sm leading-6 text-foreground">
+ 593 |           مشخصات زیر از دسته‌بندی‌های انتخاب‌شده ساخته شده‌اند.
+ 594 |         </p>
+ 595 |       </div>
+ 596 | 
+ 597 | 
+ 598 |       {groupList.map(
+ 599 |         (group) => (
+ 600 |           <section
+ 601 |             key={
+ 602 |               group.categoryId
+ 603 |             }
+ 604 |             className="rounded-2xl border border-border bg-surface"
+ 605 |           >
+ 606 |             <div className="border-b border-border px-5 py-4">
+ 607 |               <div className="flex items-center justify-between gap-4">
+ 608 |                 <div>
+ 609 |                   <h2 className="font-semibold text-foreground">
+ 610 |                     {
+ 611 |                       group.categoryName
+ 612 |                     }
+ 613 |                   </h2>
+ 614 | 
+ 615 |                   <p className="mt-1 text-xs text-muted-foreground">
+ 616 |                     {
+ 617 |                       group.fields
+ 618 |                         .length
+ 619 |                     }{' '}
+ 620 |                     مشخصه
+ 621 |                   </p>
+ 622 |                 </div>
+ 623 | 
+ 624 |                 <span className="rounded-lg bg-primary-soft px-3 py-1 text-xs font-medium text-primary">
+ 625 |                   مشخصات دسته‌بندی
+ 626 |                 </span>
+ 627 |               </div>
+ 628 |             </div>
+ 629 | 
+ 630 | 
+ 631 |             <div className="grid gap-5 p-5 md:grid-cols-2">
+ 632 |               {group.fields.map(
+ 633 |                 (field) => (
+ 634 |                   <div
+ 635 |                     key={
+ 636 |                       field.field_id
+ 637 |                     }
+ 638 |                     className={
+ 639 |                       field.field_type ===
+ 640 |                       'multi_select'
+ 641 |                         ? 'md:col-span-2'
+ 642 |                         : ''
+ 643 |                     }
+ 644 |                   >
+ 645 |                     <div className="mb-2 flex flex-wrap items-center gap-2">
+ 646 |                       <label className="text-sm font-medium text-foreground">
+ 647 |                         {
+ 648 |                           field.title
+ 649 |                         }
+ 650 | 
+ 651 |                         {field.required && (
+ 652 |                           <span className="mr-1 text-danger">
+ 653 |                             *
+ 654 |                           </span>
+ 655 |                         )}
+ 656 |                       </label>
+ 657 | 
+ 658 |                       {field.readonly && (
+ 659 |                         <span className="rounded-md bg-info-soft px-2 py-0.5 text-[11px] text-info">
+ 660 |                           فقط خواندنی
+ 661 |                         </span>
+ 662 |                       )}
+ 663 | 
+ 664 |                       {field.auto_generate && (
+ 665 |                         <span className="rounded-md bg-primary-soft px-2 py-0.5 text-[11px] text-primary">
+ 666 |                           تولید خودکار
+ 667 |                         </span>
+ 668 |                       )}
+ 669 |                     </div>
+ 670 | 
+ 671 | 
+ 672 |                     {renderControl(
+ 673 |                       field,
+ 674 |                     )}
+ 675 | 
+ 676 | 
+ 677 |                     {errors[
+ 678 |                       field.field_id
+ 679 |                     ] ? (
+ 680 |                       <p className="mt-2 text-xs text-danger">
+ 681 |                         {
+ 682 |                           errors[
+ 683 |                             field
+ 684 |                               .field_id
+ 685 |                           ]
+ 686 |                         }
+ 687 |                       </p>
+ 688 |                     ) : field.description ? (
+ 689 |                       <p className="mt-2 text-xs leading-5 text-muted-foreground">
+ 690 |                         {
+ 691 |                           field.description
+ 692 |                         }
+ 693 |                       </p>
+ 694 |                     ) : null}
+ 695 |                   </div>
+ 696 |                 ),
+ 697 |               )}
+ 698 |             </div>
+ 699 |           </section>
+ 700 |         ),
+ 701 |       )}
+ 702 |     </div>
+ 703 |   )
+ 704 | }
+
+============================================================
+FILE: E:\Computer\proj\RWMS_Front\src\modules\products\index.ts
+============================================================
+   1 | export type {
+   2 |   Product,
+   3 |   ProductCategory,
+   4 |   ProductDynamicField,
+   5 |   ProductAttributeValue,
+   6 |   CreateProductPayload,
+   7 |   UpdateProductPayload,
+   8 |   ProductListRequest,
+   9 | } from './types'
+
+============================================================
+FILE: E:\Computer\proj\RWMS_Front\src\modules\products\mocks\productRepository.mock.ts
+============================================================
+   1 | import {
+   2 |   mockCategories,
+   3 | } from '@/modules/categories/mocks/categories.mock'
+   4 | 
+   5 | import type {
+   6 |   DynamicFieldDefinition,
+   7 | } from '@/modules/categories/types/category.types'
+   8 | 
+   9 | import type {
+  10 |   PagedResult,
+  11 | } from '@/shared/types'
+  12 | 
+  13 | import type {
+  14 |   CreateProductPayload,
+  15 |   Product,
+  16 |   ProductDynamicField,
+  17 |   ProductListRequest,
+  18 |   UpdateProductPayload,
+  19 | } from '../types'
+  20 | 
+  21 | 
+  22 | const delay = (
+  23 |   milliseconds = 220,
+  24 | ) =>
+  25 |   new Promise<void>(
+  26 |     (resolve) =>
+  27 |       window.setTimeout(
+  28 |         resolve,
+  29 |         milliseconds,
+  30 |       ),
+  31 |   )
+  32 | 
+  33 | 
+  34 | function getExampleValue(
+  35 |   field: DynamicFieldDefinition,
+  36 | ): unknown {
+  37 |   if (
+  38 |     field.default_value !== null &&
+  39 |     field.default_value !== undefined
+  40 |   ) {
+  41 |     return field.default_value
+  42 |   }
+  43 | 
+  44 |   switch (field.name) {
+  45 |     case 'expiration_date':
+  46 |       return '2027-06-30'
+  47 | 
+  48 |     case 'package_type':
+  49 |       return (
+  50 |         field.options[0]?.value ??
+  51 |         null
+  52 |       )
+  53 | 
+  54 |     case 'net_weight':
+  55 |       return 10
+  56 | 
+  57 |     case 'country_of_origin':
+  58 |       return 'ایران'
+  59 | 
+  60 |     case 'brand':
+  61 |       return 'نمونه'
+  62 | 
+  63 |     case 'unit':
+  64 |       return 'بسته'
+  65 | 
+  66 |     default:
+  67 |       break
+  68 |   }
+  69 | 
+  70 |   switch (field.field_type) {
+  71 |     case 'integer':
+  72 |       return 1
+  73 | 
+  74 |     case 'decimal':
+  75 |       return 1
+  76 | 
+  77 |     case 'boolean':
+  78 |       return true
+  79 | 
+  80 |     case 'date':
+  81 |       return '2027-12-31'
+  82 | 
+  83 |     case 'datetime':
+  84 |       return '2026-09-28T08:00'
+  85 | 
+  86 |     case 'select':
+  87 |       return (
+  88 |         field.options[0]?.value ??
+  89 |         null
+  90 |       )
+  91 | 
+  92 |     case 'multi_select':
+  93 |       return field.options[0]
+  94 |         ? [field.options[0].value]
+  95 |         : []
+  96 | 
+  97 |     case 'string':
+  98 |     default:
+  99 |       return 'نمونه'
+ 100 |   }
+ 101 | }
+ 102 | 
+ 103 | 
+ 104 | function buildFields(
+ 105 |   categoryIds: number[],
+ 106 |   values?: Map<string, unknown>,
+ 107 | ): ProductDynamicField[] {
+ 108 |   return mockCategories
+ 109 |     .filter(
+ 110 |       (category) =>
+ 111 |         categoryIds.includes(
+ 112 |           category.id,
+ 113 |         ),
+ 114 |     )
+ 115 |     .flatMap(
+ 116 |       (category) =>
+ 117 |         [...category.fields]
+ 118 |           .filter(
+ 119 |             (field) =>
+ 120 |               field.is_active,
+ 121 |           )
+ 122 |           .sort(
+ 123 |             (a, b) =>
+ 124 |               a.sort_order -
+ 125 |               b.sort_order,
+ 126 |           )
+ 127 |           .map(
+ 128 |             (field) => ({
+ 129 |               ...field,
+ 130 | 
+ 131 |               category_id:
+ 132 |                 category.id,
+ 133 | 
+ 134 |               category_name:
+ 135 |                 category.name,
+ 136 | 
+ 137 |               value:
+ 138 |                 values?.has(
+ 139 |                   field.field_id,
+ 140 |                 )
+ 141 |                   ? values.get(
+ 142 |                       field.field_id,
+ 143 |                     ) ?? null
+ 144 |                   : getExampleValue(
+ 145 |                       field,
+ 146 |                     ),
+ 147 |             }),
+ 148 |           ),
+ 149 |     )
+ 150 | }
+ 151 | 
+ 152 | 
+ 153 | function createInitialProduct(
+ 154 |   id: number,
+ 155 |   name: string,
+ 156 |   categoryIds: number[],
+ 157 | ): Product {
+ 158 |   const now =
+ 159 |     new Date(
+ 160 |       Date.UTC(
+ 161 |         2026,
+ 162 |         8,
+ 163 |         20 + id,
+ 164 |         8,
+ 165 |         30,
+ 166 |       ),
+ 167 |     ).toISOString()
+ 168 | 
+ 169 |   const categories =
+ 170 |     mockCategories
+ 171 |       .filter(
+ 172 |         (category) =>
+ 173 |           categoryIds.includes(
+ 174 |             category.id,
+ 175 |           ),
+ 176 |       )
+ 177 |       .map(
+ 178 |         (category) => ({
+ 179 |           id: category.id,
+ 180 |           name: category.name,
+ 181 |         }),
+ 182 |       )
+ 183 | 
+ 184 |   return {
+ 185 |     id,
+ 186 |     name,
+ 187 |     categories,
+ 188 | 
+ 189 |     fields:
+ 190 |       buildFields(
+ 191 |         categoryIds,
+ 192 |       ),
+ 193 | 
+ 194 |     created_at: now,
+ 195 |     updated_at: now,
+ 196 |   }
+ 197 | }
+ 198 | 
+ 199 | 
+ 200 | const firstId =
+ 201 |   mockCategories[0]?.id
+ 202 | 
+ 203 | const secondId =
+ 204 |   mockCategories[1]?.id
+ 205 | 
+ 206 | const thirdId =
+ 207 |   mockCategories[2]?.id
+ 208 | 
+ 209 | 
+ 210 | let products: Product[] = [
+ 211 |   ...(firstId
+ 212 |     ? [
+ 213 |         createInitialProduct(
+ 214 |           1,
+ 215 |           'برنج ایرانی ۱۰ کیلویی',
+ 216 |           [firstId],
+ 217 |         ),
+ 218 |       ]
+ 219 |     : []),
+ 220 | 
+ 221 |   ...(secondId
+ 222 |     ? [
+ 223 |         createInitialProduct(
+ 224 |           2,
+ 225 |           'بسته بهداشتی خانواده',
+ 226 |           [secondId],
+ 227 |         ),
+ 228 |       ]
+ 229 |     : []),
+ 230 | 
+ 231 |   ...(thirdId
+ 232 |     ? [
+ 233 |         createInitialProduct(
+ 234 |           3,
+ 235 |           'پتو امدادی',
+ 236 |           [thirdId],
+ 237 |         ),
+ 238 |       ]
+ 239 |     : []),
+ 240 | 
+ 241 |   ...(firstId && secondId
+ 242 |     ? [
+ 243 |         createInitialProduct(
+ 244 |           4,
+ 245 |           'بسته معیشتی خانواده',
+ 246 |           [
+ 247 |             firstId,
+ 248 |             secondId,
+ 249 |           ],
+ 250 |         ),
+ 251 |       ]
+ 252 |     : []),
+ 253 | ]
+ 254 | 
+ 255 | 
+ 256 | function cloneProduct(
+ 257 |   product: Product,
+ 258 | ): Product {
+ 259 |   return structuredClone(
+ 260 |     product,
+ 261 |   )
+ 262 | }
+ 263 | 
+ 264 | 
+ 265 | export async function listProducts(
+ 266 |   request: ProductListRequest,
+ 267 | ): Promise<
+ 268 |   PagedResult<Product>
+ 269 | > {
+ 270 |   await delay()
+ 271 | 
+ 272 |   const search =
+ 273 |     request.search
+ 274 |       ?.trim()
+ 275 |       .toLocaleLowerCase(
+ 276 |         'fa',
+ 277 |       ) ?? ''
+ 278 | 
+ 279 |   let result =
+ 280 |     [...products]
+ 281 | 
+ 282 | 
+ 283 |   if (search) {
+ 284 |     result =
+ 285 |       result.filter(
+ 286 |         (product) =>
+ 287 |           product.name
+ 288 |             .toLocaleLowerCase(
+ 289 |               'fa',
+ 290 |             )
+ 291 |             .includes(
+ 292 |               search,
+ 293 |             ) ||
+ 294 |           product.categories.some(
+ 295 |             (category) =>
+ 296 |               category.name
+ 297 |                 .toLocaleLowerCase(
+ 298 |                   'fa',
+ 299 |                 )
+ 300 |                 .includes(
+ 301 |                   search,
+ 302 |                 ),
+ 303 |           ),
+ 304 |       )
+ 305 |   }
+ 306 | 
+ 307 | 
+ 308 |   const sortBy =
+ 309 |     request.sort_by
+ 310 | 
+ 311 |   if (sortBy) {
+ 312 |     result.sort(
+ 313 |       (a, b) => {
+ 314 |         let compare = 0
+ 315 | 
+ 316 |         if (
+ 317 |           sortBy === 'name'
+ 318 |         ) {
+ 319 |           compare =
+ 320 |             a.name.localeCompare(
+ 321 |               b.name,
+ 322 |               'fa',
+ 323 |             )
+ 324 |         } else if (
+ 325 |           sortBy ===
+ 326 |           'created_at'
+ 327 |         ) {
+ 328 |           compare =
+ 329 |             a.created_at.localeCompare(
+ 330 |               b.created_at,
+ 331 |             )
+ 332 |         } else if (
+ 333 |           sortBy ===
+ 334 |           'updated_at'
+ 335 |         ) {
+ 336 |           compare =
+ 337 |             a.updated_at.localeCompare(
+ 338 |               b.updated_at,
+ 339 |             )
+ 340 |         } else {
+ 341 |           compare =
+ 342 |             a.id - b.id
+ 343 |         }
+ 344 | 
+ 345 |         return request.is_ascending
+ 346 |           ? compare
+ 347 |           : -compare
+ 348 |       },
+ 349 |     )
+ 350 |   }
+ 351 | 
+ 352 | 
+ 353 |   const totalCount =
+ 354 |     result.length
+ 355 | 
+ 356 |   const totalPages =
+ 357 |     Math.max(
+ 358 |       1,
+ 359 |       Math.ceil(
+ 360 |         totalCount /
+ 361 |           request.page_size,
+ 362 |       ),
+ 363 |     )
+ 364 | 
+ 365 |   const safePage =
+ 366 |     Math.min(
+ 367 |       request.page_number,
+ 368 |       totalPages,
+ 369 |     )
+ 370 | 
+ 371 |   const start =
+ 372 |     (safePage - 1) *
+ 373 |     request.page_size
+ 374 | 
+ 375 |   const items =
+ 376 |     result
+ 377 |       .slice(
+ 378 |         start,
+ 379 |         start +
+ 380 |           request.page_size,
+ 381 |       )
+ 382 |       .map(
+ 383 |         cloneProduct,
+ 384 |       )
+ 385 | 
+ 386 | 
+ 387 |   return {
+ 388 |     items,
+ 389 | 
+ 390 |     total_count:
+ 391 |       totalCount,
+ 392 | 
+ 393 |     page_number:
+ 394 |       safePage,
+ 395 | 
+ 396 |     page_size:
+ 397 |       request.page_size,
+ 398 | 
+ 399 |     total_pages:
+ 400 |       totalPages,
+ 401 | 
+ 402 |     has_previous_page:
+ 403 |       safePage > 1,
+ 404 | 
+ 405 |     has_next_page:
+ 406 |       safePage <
+ 407 |       totalPages,
+ 408 |   }
+ 409 | }
+ 410 | 
+ 411 | 
+ 412 | export async function getProductById(
+ 413 |   id: number,
+ 414 | ): Promise<
+ 415 |   Product | null
+ 416 | > {
+ 417 |   await delay(150)
+ 418 | 
+ 419 |   const product =
+ 420 |     products.find(
+ 421 |       (item) =>
+ 422 |         item.id === id,
+ 423 |     )
+ 424 | 
+ 425 |   return product
+ 426 |     ? cloneProduct(
+ 427 |         product,
+ 428 |       )
+ 429 |     : null
+ 430 | }
+ 431 | 
+ 432 | 
+ 433 | export async function createProduct(
+ 434 |   payload: CreateProductPayload,
+ 435 | ): Promise<Product> {
+ 436 |   await delay(300)
+ 437 | 
+ 438 |   const id =
+ 439 |     products.length === 0
+ 440 |       ? 1
+ 441 |       : Math.max(
+ 442 |           ...products.map(
+ 443 |             (item) =>
+ 444 |               item.id,
+ 445 |           ),
+ 446 |         ) + 1
+ 447 | 
+ 448 |   const attributeMap =
+ 449 |     new Map(
+ 450 |       payload.attributes.map(
+ 451 |         (attribute) => [
+ 452 |           attribute.field_id,
+ 453 |           attribute.value,
+ 454 |         ],
+ 455 |       ),
+ 456 |     )
+ 457 | 
+ 458 |   const categories =
+ 459 |     mockCategories
+ 460 |       .filter(
+ 461 |         (category) =>
+ 462 |           payload.category_ids.includes(
+ 463 |             category.id,
+ 464 |           ),
+ 465 |       )
+ 466 |       .map(
+ 467 |         (category) => ({
+ 468 |           id: category.id,
+ 469 |           name: category.name,
+ 470 |         }),
+ 471 |       )
+ 472 | 
+ 473 |   const now =
+ 474 |     new Date().toISOString()
+ 475 | 
+ 476 |   const product: Product = {
+ 477 |     id,
+ 478 | 
+ 479 |     name:
+ 480 |       payload.name.trim(),
+ 481 | 
+ 482 |     categories,
+ 483 | 
+ 484 |     fields:
+ 485 |       buildFields(
+ 486 |         payload.category_ids,
+ 487 |         attributeMap,
+ 488 |       ),
+ 489 | 
+ 490 |     created_at: now,
+ 491 |     updated_at: now,
+ 492 |   }
+ 493 | 
+ 494 |   products = [
+ 495 |     product,
+ 496 |     ...products,
+ 497 |   ]
+ 498 | 
+ 499 |   return cloneProduct(
+ 500 |     product,
+ 501 |   )
+ 502 | }
+ 503 | 
+ 504 | 
+ 505 | export async function updateProduct(
+ 506 |   id: number,
+ 507 |   payload: UpdateProductPayload,
+ 508 | ): Promise<Product> {
+ 509 |   await delay(300)
+ 510 | 
+ 511 |   const current =
+ 512 |     products.find(
+ 513 |       (item) =>
+ 514 |         item.id === id,
+ 515 |     )
+ 516 | 
+ 517 |   if (!current) {
+ 518 |     throw new Error(
+ 519 |       'Product not found.',
+ 520 |     )
+ 521 |   }
+ 522 | 
+ 523 |   const attributeMap =
+ 524 |     new Map(
+ 525 |       payload.attributes.map(
+ 526 |         (attribute) => [
+ 527 |           attribute.field_id,
+ 528 |           attribute.value,
+ 529 |         ],
+ 530 |       ),
+ 531 |     )
+ 532 | 
+ 533 |   const categories =
+ 534 |     mockCategories
+ 535 |       .filter(
+ 536 |         (category) =>
+ 537 |           payload.category_ids.includes(
+ 538 |             category.id,
+ 539 |           ),
+ 540 |       )
+ 541 |       .map(
+ 542 |         (category) => ({
+ 543 |           id: category.id,
+ 544 |           name: category.name,
+ 545 |         }),
+ 546 |       )
+ 547 | 
+ 548 |   const updated: Product = {
+ 549 |     ...current,
+ 550 | 
+ 551 |     name:
+ 552 |       payload.name.trim(),
+ 553 | 
+ 554 |     categories,
+ 555 | 
+ 556 |     fields:
+ 557 |       buildFields(
+ 558 |         payload.category_ids,
+ 559 |         attributeMap,
+ 560 |       ),
+ 561 | 
+ 562 |     updated_at:
+ 563 |       new Date().toISOString(),
+ 564 |   }
+ 565 | 
+ 566 |   products =
+ 567 |     products.map(
+ 568 |       (item) =>
+ 569 |         item.id === id
+ 570 |           ? updated
+ 571 |           : item,
+ 572 |     )
+ 573 | 
+ 574 |   return cloneProduct(
+ 575 |     updated,
+ 576 |   )
+ 577 | }
+ 578 | 
+ 579 | 
+ 580 | export async function deleteProduct(
+ 581 |   id: number,
+ 582 | ): Promise<void> {
+ 583 |   await delay(220)
+ 584 | 
+ 585 |   products =
+ 586 |     products.filter(
+ 587 |       (item) =>
+ 588 |         item.id !== id,
+ 589 |     )
+ 590 | }
+
+============================================================
+FILE: E:\Computer\proj\RWMS_Front\src\modules\products\pages\ProductEditorPage.tsx
+============================================================
+   1 | import {
+   2 |   useEffect,
+   3 |   useMemo,
+   4 |   useState,
+   5 | } from 'react'
+   6 | 
+   7 | import {
+   8 |   ArrowRight,
+   9 |   PackagePlus,
+  10 |   Save,
+  11 | } from 'lucide-react'
+  12 | 
+  13 | import {
+  14 |   useNavigate,
+  15 |   useParams,
+  16 | } from 'react-router'
+  17 | 
+  18 | import {
+  19 |   mockCategories,
+  20 | } from '@/modules/categories/mocks/categories.mock'
+  21 | 
+  22 | import {
+  23 |   Button,
+  24 | } from '@/shared/ui/button'
+  25 | 
+  26 | import {
+  27 |   PageHeader,
+  28 | } from '@/shared/ui/page-header'
+  29 | 
+  30 | import {
+  31 |   notify,
+  32 | } from '@/shared/notifications'
+  33 | 
+  34 | import {
+  35 |   ProductCategorySelector,
+  36 | } from '../components/ProductCategorySelector'
+  37 | 
+  38 | import {
+  39 |   ProductDynamicFieldsForm,
+  40 | } from '../components/ProductDynamicFieldsForm'
+  41 | 
+  42 | import type {
+  43 |   ProductFormValues,
+  44 | } from '../components/ProductDynamicFieldsForm'
+  45 | 
+  46 | import {
+  47 |   createProduct,
+  48 |   getProductById,
+  49 |   updateProduct,
+  50 | } from '../mocks/productRepository.mock'
+  51 | 
+  52 | import type {
+  53 |   ProductDynamicField,
+  54 | } from '../types'
+  55 | 
+  56 | 
+  57 | function buildFields(
+  58 |   selectedCategoryIds: number[],
+  59 | ): ProductDynamicField[] {
+  60 |   return mockCategories
+  61 |     .filter(
+  62 |       (category) =>
+  63 |         selectedCategoryIds.includes(
+  64 |           category.id,
+  65 |         ),
+  66 |     )
+  67 |     .flatMap(
+  68 |       (category) =>
+  69 |         [...category.fields]
+  70 |           .filter(
+  71 |             (field) =>
+  72 |               field.is_active,
+  73 |           )
+  74 |           .sort(
+  75 |             (a, b) =>
+  76 |               a.sort_order -
+  77 |               b.sort_order,
+  78 |           )
+  79 |           .map(
+  80 |             (field) => ({
+  81 |               ...field,
+  82 | 
+  83 |               category_id:
+  84 |                 category.id,
+  85 | 
+  86 |               category_name:
+  87 |                 category.name,
+  88 | 
+  89 |               value:
+  90 |                 field.default_value ??
+  91 |                 null,
+  92 |             }),
+  93 |           ),
+  94 |     )
+  95 | }
+  96 | 
+  97 | 
+  98 | function isEmptyValue(
+  99 |   value: unknown,
+ 100 | ): boolean {
+ 101 |   if (
+ 102 |     value === null ||
+ 103 |     value === undefined
+ 104 |   ) {
+ 105 |     return true
+ 106 |   }
+ 107 | 
+ 108 |   if (
+ 109 |     typeof value ===
+ 110 |     'string'
+ 111 |   ) {
+ 112 |     return (
+ 113 |       value.trim() === ''
+ 114 |     )
+ 115 |   }
+ 116 | 
+ 117 |   if (
+ 118 |     Array.isArray(value)
+ 119 |   ) {
+ 120 |     return (
+ 121 |       value.length === 0
+ 122 |     )
+ 123 |   }
+ 124 | 
+ 125 |   return false
+ 126 | }
+ 127 | 
+ 128 | 
+ 129 | function ProductEditorPage() {
+ 130 |   const navigate =
+ 131 |     useNavigate()
+ 132 | 
+ 133 |   const {
+ 134 |     productId,
+ 135 |   } = useParams()
+ 136 | 
+ 137 |   const isEdit =
+ 138 |     productId !== undefined
+ 139 | 
+ 140 | 
+ 141 |   const [
+ 142 |     name,
+ 143 |     setName,
+ 144 |   ] = useState('')
+ 145 | 
+ 146 | 
+ 147 |   const [
+ 148 |     selectedCategoryIds,
+ 149 |     setSelectedCategoryIds,
+ 150 |   ] = useState<number[]>(
+ 151 |     [],
+ 152 |   )
+ 153 | 
+ 154 | 
+ 155 |   const [
+ 156 |     values,
+ 157 |     setValues,
+ 158 |   ] =
+ 159 |     useState<ProductFormValues>(
+ 160 |       {},
+ 161 |     )
+ 162 | 
+ 163 | 
+ 164 |   const [
+ 165 |     errors,
+ 166 |     setErrors,
+ 167 |   ] = useState<
+ 168 |     Record<
+ 169 |       string,
+ 170 |       string
+ 171 |     >
+ 172 |   >({})
+ 173 | 
+ 174 | 
+ 175 |   const [
+ 176 |     nameError,
+ 177 |     setNameError,
+ 178 |   ] = useState('')
+ 179 | 
+ 180 | 
+ 181 |   const [
+ 182 |     loading,
+ 183 |     setLoading,
+ 184 |   ] = useState(
+ 185 |     isEdit,
+ 186 |   )
+ 187 | 
+ 188 | 
+ 189 |   const [
+ 190 |     saving,
+ 191 |     setSaving,
+ 192 |   ] = useState(false)
+ 193 | 
+ 194 | 
+ 195 |   const fields =
+ 196 |     useMemo(
+ 197 |       () =>
+ 198 |         buildFields(
+ 199 |           selectedCategoryIds,
+ 200 |         ),
+ 201 |       [
+ 202 |         selectedCategoryIds,
+ 203 |       ],
+ 204 |     )
+ 205 | 
+ 206 | 
+ 207 |   useEffect(
+ 208 |     () => {
+ 209 |       setValues(
+ 210 |         (current) => {
+ 211 |           const next:
+ 212 |             ProductFormValues =
+ 213 |               {}
+ 214 | 
+ 215 |           for (
+ 216 |             const field of
+ 217 |             fields
+ 218 |           ) {
+ 219 |             if (
+ 220 |               Object.prototype.hasOwnProperty.call(
+ 221 |                 current,
+ 222 |                 field.field_id,
+ 223 |               )
+ 224 |             ) {
+ 225 |               next[
+ 226 |                 field.field_id
+ 227 |               ] =
+ 228 |                 current[
+ 229 |                   field.field_id
+ 230 |                 ]
+ 231 | 
+ 232 |               continue
+ 233 |             }
+ 234 | 
+ 235 |             next[
+ 236 |               field.field_id
+ 237 |             ] =
+ 238 |               field.default_value ??
+ 239 |               (
+ 240 |                 field.field_type ===
+ 241 |                 'multi_select'
+ 242 |                   ? []
+ 243 |                   : null
+ 244 |               )
+ 245 |           }
+ 246 | 
+ 247 |           return next
+ 248 |         },
+ 249 |       )
+ 250 |     },
+ 251 |     [fields],
+ 252 |   )
+ 253 | 
+ 254 | 
+ 255 |   useEffect(
+ 256 |     () => {
+ 257 |       if (!isEdit) {
+ 258 |         return
+ 259 |       }
+ 260 | 
+ 261 |       const id =
+ 262 |         Number(productId)
+ 263 | 
+ 264 |       if (
+ 265 |         !Number.isInteger(
+ 266 |           id,
+ 267 |         )
+ 268 |       ) {
+ 269 |         notify.error(
+ 270 |           'شناسه کالا معتبر نیست.',
+ 271 |         )
+ 272 | 
+ 273 |         navigate(
+ 274 |           '/products',
+ 275 |         )
+ 276 | 
+ 277 |         return
+ 278 |       }
+ 279 | 
+ 280 | 
+ 281 |       let active = true
+ 282 | 
+ 283 | 
+ 284 |       async function load() {
+ 285 |         try {
+ 286 |           setLoading(true)
+ 287 | 
+ 288 |           const product =
+ 289 |             await getProductById(
+ 290 |               id,
+ 291 |             )
+ 292 | 
+ 293 |           if (
+ 294 |             !active
+ 295 |           ) {
+ 296 |             return
+ 297 |           }
+ 298 | 
+ 299 |           if (!product) {
+ 300 |             notify.error(
+ 301 |               'کالا پیدا نشد.',
+ 302 |             )
+ 303 | 
+ 304 |             navigate(
+ 305 |               '/products',
+ 306 |             )
+ 307 | 
+ 308 |             return
+ 309 |           }
+ 310 | 
+ 311 |           setName(
+ 312 |             product.name,
+ 313 |           )
+ 314 | 
+ 315 |           setSelectedCategoryIds(
+ 316 |             product.categories.map(
+ 317 |               (category) =>
+ 318 |                 category.id,
+ 319 |             ),
+ 320 |           )
+ 321 | 
+ 322 |           const loadedValues:
+ 323 |             ProductFormValues =
+ 324 |               {}
+ 325 | 
+ 326 |           for (
+ 327 |             const field of
+ 328 |             product.fields
+ 329 |           ) {
+ 330 |             loadedValues[
+ 331 |               field.field_id
+ 332 |             ] =
+ 333 |               field.value
+ 334 |           }
+ 335 | 
+ 336 |           setValues(
+ 337 |             loadedValues,
+ 338 |           )
+ 339 |         } finally {
+ 340 |           if (active) {
+ 341 |             setLoading(false)
+ 342 |           }
+ 343 |         }
+ 344 |       }
+ 345 | 
+ 346 | 
+ 347 |       void load()
+ 348 | 
+ 349 | 
+ 350 |       return () => {
+ 351 |         active = false
+ 352 |       }
+ 353 |     },
+ 354 |     [
+ 355 |       isEdit,
+ 356 |       navigate,
+ 357 |       productId,
+ 358 |     ],
+ 359 |   )
+ 360 | 
+ 361 | 
+ 362 |   function handleFieldChange(
+ 363 |     fieldId: string,
+ 364 |     value: unknown,
+ 365 |   ) {
+ 366 |     setValues(
+ 367 |       (current) => ({
+ 368 |         ...current,
+ 369 | 
+ 370 |         [fieldId]:
+ 371 |           value,
+ 372 |       }),
+ 373 |     )
+ 374 | 
+ 375 |     setErrors(
+ 376 |       (current) => {
+ 377 |         if (
+ 378 |           !current[
+ 379 |             fieldId
+ 380 |           ]
+ 381 |         ) {
+ 382 |           return current
+ 383 |         }
+ 384 | 
+ 385 |         const next = {
+ 386 |           ...current,
+ 387 |         }
+ 388 | 
+ 389 |         delete next[
+ 390 |           fieldId
+ 391 |         ]
+ 392 | 
+ 393 |         return next
+ 394 |       },
+ 395 |     )
+ 396 |   }
+ 397 | 
+ 398 | 
+ 399 |   function validate() {
+ 400 |     let valid = true
+ 401 | 
+ 402 |     const nextErrors:
+ 403 |       Record<
+ 404 |         string,
+ 405 |         string
+ 406 |       > = {}
+ 407 | 
+ 408 | 
+ 409 |     if (
+ 410 |       !name.trim()
+ 411 |     ) {
+ 412 |       setNameError(
+ 413 |         'نام کالا الزامی است.',
+ 414 |       )
+ 415 | 
+ 416 |       valid = false
+ 417 |     } else {
+ 418 |       setNameError('')
+ 419 |     }
+ 420 | 
+ 421 | 
+ 422 |     for (
+ 423 |       const field of
+ 424 |       fields
+ 425 |     ) {
+ 426 |       if (
+ 427 |         field.required &&
+ 428 |         !field.auto_generate &&
+ 429 |         isEmptyValue(
+ 430 |           values[
+ 431 |             field.field_id
+ 432 |           ],
+ 433 |         )
+ 434 |       ) {
+ 435 |         nextErrors[
+ 436 |           field.field_id
+ 437 |         ] =
+ 438 |           'تکمیل این فیلد الزامی است.'
+ 439 | 
+ 440 |         valid = false
+ 441 |       }
+ 442 |     }
+ 443 | 
+ 444 | 
+ 445 |     setErrors(
+ 446 |       nextErrors,
+ 447 |     )
+ 448 | 
+ 449 |     return valid
+ 450 |   }
+ 451 | 
+ 452 | 
+ 453 |   async function handleSave() {
+ 454 |     if (!validate()) {
+ 455 |       notify.error(
+ 456 |         'لطفاً فیلدهای الزامی را تکمیل کنید.',
+ 457 |       )
+ 458 | 
+ 459 |       return
+ 460 |     }
+ 461 | 
+ 462 | 
+ 463 |     try {
+ 464 |       setSaving(true)
+ 465 | 
+ 466 |       const payload = {
+ 467 |         name:
+ 468 |           name.trim(),
+ 469 | 
+ 470 |         category_ids:
+ 471 |           selectedCategoryIds,
+ 472 | 
+ 473 |         attributes:
+ 474 |           fields.map(
+ 475 |             (field) => ({
+ 476 |               field_id:
+ 477 |                 field.field_id,
+ 478 | 
+ 479 |               value:
+ 480 |                 values[
+ 481 |                   field.field_id
+ 482 |                 ] ?? null,
+ 483 |             }),
+ 484 |           ),
+ 485 |       }
+ 486 | 
+ 487 | 
+ 488 |       if (
+ 489 |         isEdit
+ 490 |       ) {
+ 491 |         await updateProduct(
+ 492 |           Number(
+ 493 |             productId,
+ 494 |           ),
+ 495 |           payload,
+ 496 |         )
+ 497 | 
+ 498 |         notify.success(
+ 499 |           'کالا با موفقیت ویرایش شد.',
+ 500 |         )
+ 501 |       } else {
+ 502 |         await createProduct(
+ 503 |           payload,
+ 504 |         )
+ 505 | 
+ 506 |         notify.success(
+ 507 |           'کالا با موفقیت ایجاد شد.',
+ 508 |         )
+ 509 |       }
+ 510 | 
+ 511 | 
+ 512 |       navigate(
+ 513 |         '/products',
+ 514 |       )
+ 515 |     } catch {
+ 516 |       notify.error(
+ 517 |         'عملیات ذخیره کالا انجام نشد.',
+ 518 |       )
+ 519 |     } finally {
+ 520 |       setSaving(false)
+ 521 |     }
+ 522 |   }
+ 523 | 
+ 524 | 
+ 525 |   if (loading) {
+ 526 |     return (
+ 527 |       <div className="rounded-2xl border border-border bg-surface p-10 text-center text-sm text-muted-foreground">
+ 528 |         در حال دریافت اطلاعات کالا...
+ 529 |       </div>
+ 530 |     )
+ 531 |   }
+ 532 | 
+ 533 | 
+ 534 |   return (
+ 535 |     <div className="space-y-6">
+ 536 |       <PageHeader
+ 537 |         title={
+ 538 |           isEdit
+ 539 |             ? 'ویرایش کالا'
+ 540 |             : 'ایجاد کالا'
+ 541 |         }
+ 542 |         description={
+ 543 |           isEdit
+ 544 |             ? 'اطلاعات و مشخصات کالا را ویرایش کنید.'
+ 545 |             : 'اطلاعات پایه، دسته‌بندی‌ها و مشخصات کالا را وارد کنید.'
+ 546 |         }
+ 547 |         actions={
+ 548 |           <Button
+ 549 |             type="button"
+ 550 |             variant="outline"
+ 551 |             onClick={() =>
+ 552 |               navigate(
+ 553 |                 '/products',
+ 554 |               )
+ 555 |             }
+ 556 |           >
+ 557 |             <ArrowRight
+ 558 |               size={17}
+ 559 |             />
+ 560 | 
+ 561 |             بازگشت
+ 562 |           </Button>
+ 563 |         }
+ 564 |       />
+ 565 | 
+ 566 | 
+ 567 |       <section className="rounded-2xl border border-border bg-surface p-5">
+ 568 |         <div className="mb-5 flex items-start gap-3">
+ 569 |           <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
+ 570 |             <PackagePlus
+ 571 |               size={20}
+ 572 |             />
+ 573 |           </div>
+ 574 | 
+ 575 |           <div>
+ 576 |             <h2 className="font-semibold text-foreground">
+ 577 |               اطلاعات پایه کالا
+ 578 |             </h2>
+ 579 | 
+ 580 |             <p className="mt-1 text-sm text-muted-foreground">
+ 581 |               اطلاعات اصلی کالا را وارد کنید.
+ 582 |             </p>
+ 583 |           </div>
+ 584 |         </div>
+ 585 | 
+ 586 | 
+ 587 |         <div className="max-w-2xl">
+ 588 |           <label className="mb-2 block text-sm font-medium text-foreground">
+ 589 |             نام کالا
+ 590 |             <span className="mr-1 text-danger">
+ 591 |               *
+ 592 |             </span>
+ 593 |           </label>
+ 594 | 
+ 595 |           <input
+ 596 |             className={[
+ 597 |               'w-full rounded-xl border bg-surface px-3 py-2.5 text-sm text-foreground outline-none transition',
+ 598 |               nameError
+ 599 |                 ? 'border-danger focus:ring-2 focus:ring-danger/15'
+ 600 |                 : 'border-border focus:border-primary focus:ring-2 focus:ring-primary/15',
+ 601 |             ].join(' ')}
+ 602 |             value={name}
+ 603 |             placeholder="مثلاً برنج ایرانی ۱۰ کیلویی"
+ 604 |             onChange={(
+ 605 |               event,
+ 606 |             ) => {
+ 607 |               setName(
+ 608 |                 event.target
+ 609 |                   .value,
+ 610 |               )
+ 611 | 
+ 612 |               if (
+ 613 |                 nameError
+ 614 |               ) {
+ 615 |                 setNameError('')
+ 616 |               }
+ 617 |             }}
+ 618 |           />
+ 619 | 
+ 620 |           {nameError && (
+ 621 |             <p className="mt-2 text-xs text-danger">
+ 622 |               {
+ 623 |                 nameError
+ 624 |               }
+ 625 |             </p>
+ 626 |           )}
+ 627 |         </div>
+ 628 |       </section>
+ 629 | 
+ 630 | 
+ 631 |       <ProductCategorySelector
+ 632 |         selectedIds={
+ 633 |           selectedCategoryIds
+ 634 |         }
+ 635 |         onChange={
+ 636 |           setSelectedCategoryIds
+ 637 |         }
+ 638 |       />
+ 639 | 
+ 640 | 
+ 641 |       <ProductDynamicFieldsForm
+ 642 |         fields={fields}
+ 643 |         values={values}
+ 644 |         errors={errors}
+ 645 |         onChange={
+ 646 |           handleFieldChange
+ 647 |         }
+ 648 |       />
+ 649 | 
+ 650 | 
+ 651 |       <div className="flex flex-col-reverse gap-3 border-t border-border pt-5 sm:flex-row sm:justify-end">
+ 652 |         <Button
+ 653 |           type="button"
+ 654 |           variant="outline"
+ 655 |           disabled={
+ 656 |             saving
+ 657 |           }
+ 658 |           onClick={() =>
+ 659 |             navigate(
+ 660 |               '/products',
+ 661 |             )
+ 662 |           }
+ 663 |         >
+ 664 |           انصراف
+ 665 |         </Button>
+ 666 | 
+ 667 |         <Button
+ 668 |           type="button"
+ 669 |           isLoading={
+ 670 |             saving
+ 671 |           }
+ 672 |           onClick={
+ 673 |             handleSave
+ 674 |           }
+ 675 |         >
+ 676 |           <Save
+ 677 |             size={17}
+ 678 |           />
+ 679 | 
+ 680 |           {isEdit
+ 681 |             ? 'ذخیره تغییرات'
+ 682 |             : 'ایجاد کالا'}
+ 683 |         </Button>
+ 684 |       </div>
+ 685 |     </div>
+ 686 |   )
+ 687 | }
+ 688 | 
+ 689 | 
+ 690 | export default ProductEditorPage
+
+============================================================
+FILE: E:\Computer\proj\RWMS_Front\src\modules\products\pages\ProductsPage.tsx
+============================================================
+   1 | import {
+   2 |   useCallback,
+   3 |   useEffect,
+   4 |   useState,
+   5 | } from 'react'
+   6 | 
+   7 | import {
+   8 |   ArrowDown,
+   9 |   ArrowUp,
+  10 |   ChevronsUpDown,
+  11 |   Edit3,
+  12 |   Package,
+  13 |   PackagePlus,
+  14 |   Search,
+  15 |   Trash2,
+  16 | } from 'lucide-react'
+  17 | 
+  18 | import {
+  19 |   useNavigate,
+  20 | } from 'react-router'
+  21 | 
+  22 | import {
+  23 |   Button,
+  24 | } from '@/shared/ui/button'
+  25 | 
+  26 | import {
+  27 |   ConfirmDialog,
+  28 | } from '@/shared/ui/dialog'
+  29 | 
+  30 | import {
+  31 |   PageHeader,
+  32 | } from '@/shared/ui/page-header'
+  33 | 
+  34 | import {
+  35 |   notify,
+  36 | } from '@/shared/notifications'
+  37 | 
+  38 | import {
+  39 |   deleteProduct,
+  40 |   listProducts,
+  41 | } from '../mocks/productRepository.mock'
+  42 | 
+  43 | import type {
+  44 |   Product,
+  45 | } from '../types'
+  46 | 
+  47 | 
+  48 | type SortColumn =
+  49 |   | 'name'
+  50 |   | 'created_at'
+  51 |   | 'updated_at'
+  52 | 
+  53 | 
+  54 | function formatDate(
+  55 |   value: string,
+  56 | ) {
+  57 |   try {
+  58 |     return new Intl.DateTimeFormat(
+  59 |       'fa-IR',
+  60 |       {
+  61 |         year:
+  62 |           'numeric',
+  63 | 
+  64 |         month:
+  65 |           '2-digit',
+  66 | 
+  67 |         day:
+  68 |           '2-digit',
+  69 |       },
+  70 |     ).format(
+  71 |       new Date(value),
+  72 |     )
+  73 |   } catch {
+  74 |     return value
+  75 |   }
+  76 | }
+  77 | 
+  78 | 
+  79 | function ProductsPage() {
+  80 |   const navigate =
+  81 |     useNavigate()
+  82 | 
+  83 | 
+  84 |   const [
+  85 |     products,
+  86 |     setProducts,
+  87 |   ] =
+  88 |     useState<Product[]>(
+  89 |       [],
+  90 |     )
+  91 | 
+  92 | 
+  93 |   const [
+  94 |     totalCount,
+  95 |     setTotalCount,
+  96 |   ] =
+  97 |     useState(0)
+  98 | 
+  99 | 
+ 100 |   const [
+ 101 |     page,
+ 102 |     setPage,
+ 103 |   ] =
+ 104 |     useState(1)
+ 105 | 
+ 106 | 
+ 107 |   const [
+ 108 |     pageSize,
+ 109 |     setPageSize,
+ 110 |   ] =
+ 111 |     useState(10)
+ 112 | 
+ 113 | 
+ 114 |   const [
+ 115 |     totalPages,
+ 116 |     setTotalPages,
+ 117 |   ] =
+ 118 |     useState(1)
+ 119 | 
+ 120 | 
+ 121 |   const [
+ 122 |     search,
+ 123 |     setSearch,
+ 124 |   ] =
+ 125 |     useState('')
+ 126 | 
+ 127 | 
+ 128 |   const [
+ 129 |     sortBy,
+ 130 |     setSortBy,
+ 131 |   ] =
+ 132 |     useState<
+ 133 |       SortColumn | null
+ 134 |     >(null)
+ 135 | 
+ 136 | 
+ 137 |   const [
+ 138 |     ascending,
+ 139 |     setAscending,
+ 140 |   ] =
+ 141 |     useState(true)
+ 142 | 
+ 143 | 
+ 144 |   const [
+ 145 |     loading,
+ 146 |     setLoading,
+ 147 |   ] =
+ 148 |     useState(true)
+ 149 | 
+ 150 | 
+ 151 |   const [
+ 152 |     deleteTarget,
+ 153 |     setDeleteTarget,
+ 154 |   ] =
+ 155 |     useState<
+ 156 |       Product | null
+ 157 |     >(null)
+ 158 | 
+ 159 | 
+ 160 |   const [
+ 161 |     deleting,
+ 162 |     setDeleting,
+ 163 |   ] =
+ 164 |     useState(false)
+ 165 | 
+ 166 | 
+ 167 |   const load =
+ 168 |     useCallback(
+ 169 |       async () => {
+ 170 |         try {
+ 171 |           setLoading(true)
+ 172 | 
+ 173 |           const result =
+ 174 |             await listProducts({
+ 175 |               page_number:
+ 176 |                 page,
+ 177 | 
+ 178 |               page_size:
+ 179 |                 pageSize,
+ 180 | 
+ 181 |               sort_by:
+ 182 |                 sortBy,
+ 183 | 
+ 184 |               is_ascending:
+ 185 |                 ascending,
+ 186 | 
+ 187 |               filter:
+ 188 |                 null,
+ 189 | 
+ 190 |               search,
+ 191 |             })
+ 192 | 
+ 193 |           setProducts(
+ 194 |             result.items,
+ 195 |           )
+ 196 | 
+ 197 |           setTotalCount(
+ 198 |             result.total_count,
+ 199 |           )
+ 200 | 
+ 201 |           setTotalPages(
+ 202 |             result.total_pages,
+ 203 |           )
+ 204 | 
+ 205 |           if (
+ 206 |             page !==
+ 207 |             result.page_number
+ 208 |           ) {
+ 209 |             setPage(
+ 210 |               result.page_number,
+ 211 |             )
+ 212 |           }
+ 213 |         } finally {
+ 214 |           setLoading(false)
+ 215 |         }
+ 216 |       },
+ 217 |       [
+ 218 |         ascending,
+ 219 |         page,
+ 220 |         pageSize,
+ 221 |         search,
+ 222 |         sortBy,
+ 223 |       ],
+ 224 |     )
+ 225 | 
+ 226 | 
+ 227 |   useEffect(
+ 228 |     () => {
+ 229 |       void load()
+ 230 |     },
+ 231 |     [load],
+ 232 |   )
+ 233 | 
+ 234 | 
+ 235 |   function changeSort(
+ 236 |     column: SortColumn,
+ 237 |   ) {
+ 238 |     setPage(1)
+ 239 | 
+ 240 |     if (
+ 241 |       sortBy === column
+ 242 |     ) {
+ 243 |       setAscending(
+ 244 |         (current) =>
+ 245 |           !current,
+ 246 |       )
+ 247 | 
+ 248 |       return
+ 249 |     }
+ 250 | 
+ 251 |     setSortBy(
+ 252 |       column,
+ 253 |     )
+ 254 | 
+ 255 |     setAscending(
+ 256 |       true,
+ 257 |     )
+ 258 |   }
+ 259 | 
+ 260 | 
+ 261 |   function sortIcon(
+ 262 |     column: SortColumn,
+ 263 |   ) {
+ 264 |     if (
+ 265 |       sortBy !== column
+ 266 |     ) {
+ 267 |       return (
+ 268 |         <ChevronsUpDown
+ 269 |           size={14}
+ 270 |           className="text-muted-foreground"
+ 271 |         />
+ 272 |       )
+ 273 |     }
+ 274 | 
+ 275 |     return ascending ? (
+ 276 |       <ArrowUp
+ 277 |         size={14}
+ 278 |         className="text-primary"
+ 279 |       />
+ 280 |     ) : (
+ 281 |       <ArrowDown
+ 282 |         size={14}
+ 283 |         className="text-primary"
+ 284 |       />
+ 285 |     )
+ 286 |   }
+ 287 | 
+ 288 | 
+ 289 |   async function confirmDelete() {
+ 290 |     if (!deleteTarget) {
+ 291 |       return
+ 292 |     }
+ 293 | 
+ 294 |     try {
+ 295 |       setDeleting(true)
+ 296 | 
+ 297 |       await deleteProduct(
+ 298 |         deleteTarget.id,
+ 299 |       )
+ 300 | 
+ 301 |       notify.success(
+ 302 |         `کالای «${deleteTarget.name}» حذف شد.`,
+ 303 |       )
+ 304 | 
+ 305 |       setDeleteTarget(
+ 306 |         null,
+ 307 |       )
+ 308 | 
+ 309 |       await load()
+ 310 |     } finally {
+ 311 |       setDeleting(false)
+ 312 |     }
+ 313 |   }
+ 314 | 
+ 315 | 
+ 316 |   return (
+ 317 |     <>
+ 318 |       <div className="space-y-6">
+ 319 |         <PageHeader
+ 320 |           title="کالاها"
+ 321 |           description="تعریف و مدیریت کالاها و مشخصات داینامیک آنها"
+ 322 |           actions={
+ 323 |             <Button
+ 324 |               type="button"
+ 325 |               onClick={() =>
+ 326 |                 navigate(
+ 327 |                   '/products/new',
+ 328 |                 )
+ 329 |               }
+ 330 |             >
+ 331 |               <PackagePlus
+ 332 |                 size={17}
+ 333 |               />
+ 334 | 
+ 335 |               ایجاد کالا
+ 336 |             </Button>
+ 337 |           }
+ 338 |         />
+ 339 | 
+ 340 | 
+ 341 |         <div className="grid gap-4 sm:grid-cols-3">
+ 342 |           <div className="rounded-2xl border border-border bg-surface p-5">
+ 343 |             <div className="flex items-center gap-3">
+ 344 |               <div className="flex size-10 items-center justify-center rounded-xl bg-primary-soft text-primary">
+ 345 |                 <Package
+ 346 |                   size={20}
+ 347 |                 />
+ 348 |               </div>
+ 349 | 
+ 350 |               <div>
+ 351 |                 <p className="text-xs text-muted-foreground">
+ 352 |                   تعداد کالاها
+ 353 |                 </p>
+ 354 | 
+ 355 |                 <p className="mt-1 text-xl font-bold text-foreground">
+ 356 |                   {
+ 357 |                     totalCount
+ 358 |                   }
+ 359 |                 </p>
+ 360 |               </div>
+ 361 |             </div>
+ 362 |           </div>
+ 363 | 
+ 364 | 
+ 365 |           <div className="rounded-2xl border border-border bg-surface p-5 sm:col-span-2">
+ 366 |             <p className="text-sm font-medium text-foreground">
+ 367 |               ساختار کالا
+ 368 |             </p>
+ 369 | 
+ 370 |             <p className="mt-2 text-sm leading-6 text-muted-foreground">
+ 371 |               هر کالا میتواند عضو چند دستهبندی باشد و مشخصات آن بهصورت خودکار از همان دستهبندیها ساخته میشود.
+ 372 |             </p>
+ 373 |           </div>
+ 374 |         </div>
+ 375 | 
+ 376 | 
+ 377 |         <section className="rounded-2xl border border-border bg-surface">
+ 378 |           <div className="flex flex-col gap-3 border-b border-border p-4 lg:flex-row lg:items-center lg:justify-between">
+ 379 |             <div className="relative w-full lg:max-w-lg">
+ 380 |               <Search
+ 381 |                 size={17}
+ 382 |                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+ 383 |               />
+ 384 | 
+ 385 |               <input
+ 386 |                 className="w-full rounded-xl border border-border bg-surface py-2.5 pr-10 pl-3 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15"
+ 387 |                 value={search}
+ 388 |                 placeholder="جستجو در نام کالا یا دستهبندی..."
+ 389 |                 onChange={(
+ 390 |                   event,
+ 391 |                 ) => {
+ 392 |                   setSearch(
+ 393 |                     event.target
+ 394 |                       .value,
+ 395 |                   )
+ 396 | 
+ 397 |                   setPage(1)
+ 398 |                 }}
+ 399 |               />
+ 400 |             </div>
+ 401 | 
+ 402 | 
+ 403 |             <div className="flex items-center gap-2">
+ 404 |               <span className="text-xs text-muted-foreground">
+ 405 |                 تعداد نمایش:
+ 406 |               </span>
+ 407 | 
+ 408 |               <select
+ 409 |                 value={pageSize}
+ 410 |                 className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15"
+ 411 |                 onChange={(
+ 412 |                   event,
+ 413 |                 ) => {
+ 414 |                   setPageSize(
+ 415 |                     Number(
+ 416 |                       event.target
+ 417 |                         .value,
+ 418 |                     ),
+ 419 |                   )
+ 420 | 
+ 421 |                   setPage(1)
+ 422 |                 }}
+ 423 |               >
+ 424 |                 <option value={10}>
+ 425 |                   ۱۰
+ 426 |                 </option>
+ 427 | 
+ 428 |                 <option value={20}>
+ 429 |                   ۲۰
+ 430 |                 </option>
+ 431 | 
+ 432 |                 <option value={50}>
+ 433 |                   ۵۰
+ 434 |                 </option>
+ 435 | 
+ 436 |                 <option value={100}>
+ 437 |                   ۱۰۰
+ 438 |                 </option>
+ 439 |               </select>
+ 440 |             </div>
+ 441 |           </div>
+ 442 | 
+ 443 | 
+ 444 |           <div className="overflow-x-auto">
+ 445 |             <table className="w-full min-w-[850px] border-collapse text-sm">
+ 446 |               <thead>
+ 447 |                 <tr className="border-b border-border bg-surface-muted/50 text-right">
+ 448 |                   <th className="px-4 py-3 font-medium text-muted-foreground">
+ 449 |                     ردیف
+ 450 |                   </th>
+ 451 | 
+ 452 |                   <th className="px-4 py-3 font-medium">
+ 453 |                     <button
+ 454 |                       type="button"
+ 455 |                       className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground"
+ 456 |                       onClick={() =>
+ 457 |                         changeSort(
+ 458 |                           'name',
+ 459 |                         )
+ 460 |                       }
+ 461 |                     >
+ 462 |                       نام کالا
+ 463 | 
+ 464 |                       {sortIcon(
+ 465 |                         'name',
+ 466 |                       )}
+ 467 |                     </button>
+ 468 |                   </th>
+ 469 | 
+ 470 |                   <th className="px-4 py-3 font-medium text-muted-foreground">
+ 471 |                     دستهبندیها
+ 472 |                   </th>
+ 473 | 
+ 474 |                   <th className="px-4 py-3 font-medium text-muted-foreground">
+ 475 |                     مشخصات
+ 476 |                   </th>
+ 477 | 
+ 478 |                   <th className="px-4 py-3 font-medium">
+ 479 |                     <button
+ 480 |                       type="button"
+ 481 |                       className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground"
+ 482 |                       onClick={() =>
+ 483 |                         changeSort(
+ 484 |                           'updated_at',
+ 485 |                         )
+ 486 |                       }
+ 487 |                     >
+ 488 |                       آخرین تغییر
+ 489 | 
+ 490 |                       {sortIcon(
+ 491 |                         'updated_at',
+ 492 |                       )}
+ 493 |                     </button>
+ 494 |                   </th>
+ 495 | 
+ 496 |                   <th className="px-4 py-3 text-center font-medium text-muted-foreground">
+ 497 |                     عملیات
+ 498 |                   </th>
+ 499 |                 </tr>
+ 500 |               </thead>
+ 501 | 
+ 502 | 
+ 503 |               <tbody>
+ 504 |                 {loading ? (
+ 505 |                   <tr>
+ 506 |                     <td
+ 507 |                       colSpan={6}
+ 508 |                       className="px-4 py-14 text-center text-muted-foreground"
+ 509 |                     >
+ 510 |                       در حال دریافت کالاها...
+ 511 |                     </td>
+ 512 |                   </tr>
+ 513 |                 ) : products.length ===
+ 514 |                   0 ? (
+ 515 |                   <tr>
+ 516 |                     <td
+ 517 |                       colSpan={6}
+ 518 |                       className="px-4 py-14 text-center"
+ 519 |                     >
+ 520 |                       <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-primary-soft text-primary">
+ 521 |                         <Package
+ 522 |                           size={22}
+ 523 |                         />
+ 524 |                       </div>
+ 525 | 
+ 526 |                       <p className="mt-4 font-medium text-foreground">
+ 527 |                         کالایی پیدا نشد
+ 528 |                       </p>
+ 529 | 
+ 530 |                       <p className="mt-2 text-sm text-muted-foreground">
+ 531 |                         میتوانید اولین کالا را ایجاد کنید.
+ 532 |                       </p>
+ 533 |                     </td>
+ 534 |                   </tr>
+ 535 |                 ) : (
+ 536 |                   products.map(
+ 537 |                     (
+ 538 |                       product,
+ 539 |                       index,
+ 540 |                     ) => (
+ 541 |                       <tr
+ 542 |                         key={
+ 543 |                           product.id
+ 544 |                         }
+ 545 |                         className="border-b border-border last:border-0 hover:bg-surface-muted/30"
+ 546 |                       >
+ 547 |                         <td className="px-4 py-4 text-muted-foreground">
+ 548 |                           {(page -
+ 549 |                             1) *
+ 550 |                             pageSize +
+ 551 |                             index +
+ 552 |                             1}
+ 553 |                         </td>
+ 554 | 
+ 555 |                         <td className="px-4 py-4">
+ 556 |                           <div className="font-medium text-foreground">
+ 557 |                             {
+ 558 |                               product.name
+ 559 |                             }
+ 560 |                           </div>
+ 561 | 
+ 562 |                           <div className="mt-1 text-xs text-muted-foreground">
+ 563 |                             شناسه:{' '}
+ 564 |                             {
+ 565 |                               product.id
+ 566 |                             }
+ 567 |                           </div>
+ 568 |                         </td>
+ 569 | 
+ 570 |                         <td className="px-4 py-4">
+ 571 |                           <div className="flex max-w-md flex-wrap gap-1.5">
+ 572 |                             {product.categories.map(
+ 573 |                               (
+ 574 |                                 category,
+ 575 |                               ) => (
+ 576 |                                 <span
+ 577 |                                   key={
+ 578 |                                     category.id
+ 579 |                                   }
+ 580 |                                   className="rounded-lg bg-primary-soft px-2.5 py-1 text-xs font-medium text-primary"
+ 581 |                                 >
+ 582 |                                   {
+ 583 |                                     category.name
+ 584 |                                   }
+ 585 |                                 </span>
+ 586 |                               ),
+ 587 |                             )}
+ 588 | 
+ 589 |                             {product.categories.length ===
+ 590 |                               0 && (
+ 591 |                               <span className="text-xs text-muted-foreground">
+ 592 |                                 بدون دستهبندی
+ 593 |                               </span>
+ 594 |                             )}
+ 595 |                           </div>
+ 596 |                         </td>
+ 597 | 
+ 598 |                         <td className="px-4 py-4">
+ 599 |                           <span className="rounded-lg bg-surface-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
+ 600 |                             {
+ 601 |                               product
+ 602 |                                 .fields
+ 603 |                                 .length
+ 604 |                             }{' '}
+ 605 |                             فیلد
+ 606 |                           </span>
+ 607 |                         </td>
+ 608 | 
+ 609 |                         <td className="px-4 py-4 text-muted-foreground">
+ 610 |                           {formatDate(
+ 611 |                             product.updated_at,
+ 612 |                           )}
+ 613 |                         </td>
+ 614 | 
+ 615 |                         <td className="px-4 py-4">
+ 616 |                           <div className="flex items-center justify-center gap-2">
+ 617 |                             <Button
+ 618 |                               type="button"
+ 619 |                               variant="outline"
+ 620 |                               onClick={() =>
+ 621 |                                 navigate(
+ 622 |                                   `/products/${product.id}/edit`,
+ 623 |                                 )
+ 624 |                               }
+ 625 |                             >
+ 626 |                               <Edit3
+ 627 |                                 size={15}
+ 628 |                               />
+ 629 | 
+ 630 |                               ویرایش
+ 631 |                             </Button>
+ 632 | 
+ 633 |                             <Button
+ 634 |                               type="button"
+ 635 |                               variant="outline"
+ 636 |                               onClick={() =>
+ 637 |                                 setDeleteTarget(
+ 638 |                                   product,
+ 639 |                                 )
+ 640 |                               }
+ 641 |                             >
+ 642 |                               <Trash2
+ 643 |                                 size={15}
+ 644 |                               />
+ 645 | 
+ 646 |                               حذف
+ 647 |                             </Button>
+ 648 |                           </div>
+ 649 |                         </td>
+ 650 |                       </tr>
+ 651 |                     ),
+ 652 |                   )
+ 653 |                 )}
+ 654 |               </tbody>
+ 655 |             </table>
+ 656 |           </div>
+ 657 | 
+ 658 | 
+ 659 |           <div className="flex flex-col gap-4 border-t border-border p-4 lg:flex-row lg:items-center lg:justify-between">
+ 660 |             <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+ 661 |               <span>
+ 662 |                 صفحه {page} از{' '}
+ 663 |                 {totalPages}
+ 664 |               </span>
+ 665 | 
+ 666 |               <span>
+ 667 |                 {
+ 668 |                   totalCount
+ 669 |                 }{' '}
+ 670 |                 کالا
+ 671 |               </span>
+ 672 | 
+ 673 |               <span>
+ 674 |                 نمایش حداکثر{' '}
+ 675 |                 {
+ 676 |                   pageSize
+ 677 |                 }{' '}
+ 678 |                 رکورد در هر صفحه
+ 679 |               </span>
+ 680 |             </div>
+ 681 | 
+ 682 | 
+ 683 |             <div className="flex gap-2">
+ 684 |               <Button
+ 685 |                 type="button"
+ 686 |                 variant="outline"
+ 687 |                 disabled={
+ 688 |                   page <= 1 ||
+ 689 |                   loading
+ 690 |                 }
+ 691 |                 onClick={() =>
+ 692 |                   setPage(
+ 693 |                     (current) =>
+ 694 |                       Math.max(
+ 695 |                         1,
+ 696 |                         current -
+ 697 |                           1,
+ 698 |                       ),
+ 699 |                   )
+ 700 |                 }
+ 701 |               >
+ 702 |                 قبلی
+ 703 |               </Button>
+ 704 | 
+ 705 |               <Button
+ 706 |                 type="button"
+ 707 |                 variant="outline"
+ 708 |                 disabled={
+ 709 |                   page >=
+ 710 |                     totalPages ||
+ 711 |                   loading
+ 712 |                 }
+ 713 |                 onClick={() =>
+ 714 |                   setPage(
+ 715 |                     (current) =>
+ 716 |                       Math.min(
+ 717 |                         totalPages,
+ 718 |                         current +
+ 719 |                           1,
+ 720 |                       ),
+ 721 |                   )
+ 722 |                 }
+ 723 |               >
+ 724 |                 بعدی
+ 725 |               </Button>
+ 726 |             </div>
+ 727 |           </div>
+ 728 |         </section>
+ 729 |       </div>
+ 730 | 
+ 731 | 
+ 732 |       <ConfirmDialog
+ 733 |         open={
+ 734 |           deleteTarget !== null
+ 735 |         }
+ 736 |         onOpenChange={(
+ 737 |           open,
+ 738 |         ) => {
+ 739 |           if (!open) {
+ 740 |             setDeleteTarget(
+ 741 |               null,
+ 742 |             )
+ 743 |           }
+ 744 |         }}
+ 745 |         title="حذف کالا"
+ 746 |         description={
+ 747 |           deleteTarget
+ 748 |             ? `آیا از حذف کالای «${deleteTarget.name}» مطمئن هستید`
+ 749 |             : ''
+ 750 |         }
+ 751 |         confirmLabel="حذف کالا"
+ 752 |         cancelLabel="انصراف"
+ 753 |         variant="danger"
+ 754 |         isLoading={
+ 755 |           deleting
+ 756 |         }
+ 757 |         onConfirm={
+ 758 |           confirmDelete
+ 759 |         }
+ 760 |       />
+ 761 |     </>
+ 762 |   )
+ 763 | }
+ 764 | 
+ 765 | 
+ 766 | export default ProductsPage
+
+============================================================
+FILE: E:\Computer\proj\RWMS_Front\src\modules\products\routes\index.ts
+============================================================
+   1 | export {
+   2 |   productRoutes,
+   3 | } from './products.routes'
+
+============================================================
+FILE: E:\Computer\proj\RWMS_Front\src\modules\products\routes\products.routes.tsx
+============================================================
+   1 | import type {
+   2 |   RouteObject,
+   3 | } from 'react-router'
+   4 | 
+   5 | 
+   6 | async function loadProductsPage() {
+   7 |   const module =
+   8 |     await import(
+   9 |       '../pages/ProductsPage'
+  10 |     )
+  11 | 
+  12 |   return {
+  13 |     Component:
+  14 |       module.default,
+  15 |   }
+  16 | }
+  17 | 
+  18 | 
+  19 | async function loadProductEditorPage() {
+  20 |   const module =
+  21 |     await import(
+  22 |       '../pages/ProductEditorPage'
+  23 |     )
+  24 | 
+  25 |   return {
+  26 |     Component:
+  27 |       module.default,
+  28 |   }
+  29 | }
+  30 | 
+  31 | 
+  32 | export const productRoutes: RouteObject[] = [
+  33 |   {
+  34 |     path:
+  35 |       'products',
+  36 | 
+  37 |     lazy:
+  38 |       loadProductsPage,
+  39 |   },
+  40 | 
+  41 |   {
+  42 |     path:
+  43 |       'products/new',
+  44 | 
+  45 |     lazy:
+  46 |       loadProductEditorPage,
+  47 |   },
+  48 | 
+  49 |   {
+  50 |     path:
+  51 |       'products/:productId/edit',
+  52 | 
+  53 |     lazy:
+  54 |       loadProductEditorPage,
+  55 |   },
+  56 | 
+  57 | 
+  58 |   // --------------------------------------------
+  59 |   // Compatibility aliases for existing dashboard
+  60 |   // --------------------------------------------
+  61 | 
+  62 |   {
+  63 |     path:
+  64 |       'items',
+  65 | 
+  66 |     lazy:
+  67 |       loadProductsPage,
+  68 |   },
+  69 | 
+  70 |   {
+  71 |     path:
+  72 |       'items/new',
+  73 | 
+  74 |     lazy:
+  75 |       loadProductEditorPage,
+  76 |   },
+  77 | 
+  78 |   {
+  79 |     path:
+  80 |       'items/:productId/edit',
+  81 | 
+  82 |     lazy:
+  83 |       loadProductEditorPage,
+  84 |   },
+  85 | ]
+
+============================================================
+FILE: E:\Computer\proj\RWMS_Front\src\modules\products\types\index.ts
+============================================================
+   1 | export type {
+   2 |   Product,
+   3 |   ProductCategory,
+   4 |   ProductDynamicField,
+   5 |   ProductAttributeValue,
+   6 |   CreateProductPayload,
+   7 |   UpdateProductPayload,
+   8 |   ProductListRequest,
+   9 | } from './product.types'
+
+============================================================
+FILE: E:\Computer\proj\RWMS_Front\src\modules\products\types\product.types.ts
+============================================================
+   1 | import type {
+   2 |   DynamicFieldDefinition,
+   3 | } from '@/modules/categories/types/category.types'
+   4 | 
+   5 | 
+   6 | export interface ProductCategory {
+   7 |   id: number
+   8 |   name: string
+   9 | }
+  10 | 
+  11 | 
+  12 | export interface ProductDynamicField
+  13 |   extends DynamicFieldDefinition {
+  14 |   category_id: number
+  15 |   category_name: string
+  16 |   value: unknown | null
+  17 | }
+  18 | 
+  19 | 
+  20 | export interface Product {
+  21 |   id: number
+  22 |   name: string
+  23 | 
+  24 |   categories: ProductCategory[]
+  25 | 
+  26 |   fields: ProductDynamicField[]
+  27 | 
+  28 |   created_at: string
+  29 |   updated_at: string
+  30 | }
+  31 | 
+  32 | 
+  33 | export interface ProductAttributeValue {
+  34 |   field_id: string
+  35 |   value: unknown
+  36 | }
+  37 | 
+  38 | 
+  39 | export interface CreateProductPayload {
+  40 |   name: string
+  41 | 
+  42 |   category_ids: number[]
+  43 | 
+  44 |   attributes: ProductAttributeValue[]
+  45 | }
+  46 | 
+  47 | 
+  48 | export interface UpdateProductPayload
+  49 |   extends CreateProductPayload {}
+  50 | 
+  51 | 
+  52 | export interface ProductListRequest {
+  53 |   page_number: number
+  54 |   page_size: number
+  55 |   sort_by: string | null
+  56 |   is_ascending: boolean
+  57 |   filter: null
+  58 | 
+  59 |   search?: string
+  60 | }
+
+============================================================
+FILE: .\src\modules\categories\api\category.api.ts
+============================================================
+   1 | import {
+   2 |   apiClient,
+   3 | } from '@/shared/api'
+   4 | 
+   5 | import type {
+   6 |   PagedRequest,
+   7 |   PagedResult,
+   8 | } from '@/shared/types'
+   9 | 
+  10 | import type {
+  11 |   Category,
+  12 |   DynamicFieldDefinition,
+  13 | } from '../types/category.types'
+  14 | 
+  15 | 
+  16 | /**
+  17 |  * Backend endpoint:
+  18 |  *
+  19 |  * GET /api/v1Categories/V1
+  20 |  *
+  21 |  * Search is intentionally kept in the frontend request contract
+  22 |  * because the current UI already has a search box.
+  23 |  *
+  24 |  * The current MVP backend does NOT support search yet,
+  25 |  * so it is intentionally NOT sent to the server.
+  26 |  */
+  27 | export interface CategoryListRequest
+  28 |   extends PagedRequest<null> {
+  29 |   search?: string
+  30 | }
+  31 | 
+  32 | 
+  33 | interface CategorySummaryApiDto {
+  34 |   id: number
+  35 | 
+  36 |   name: string
+  37 | 
+  38 |   description: string | null
+  39 | 
+  40 |   created_at: string
+  41 | 
+  42 |   updated_at: string
+  43 | }
+  44 | 
+  45 | 
+  46 | interface ApiResponse<T> {
+  47 |   is_success: boolean
+  48 | 
+  49 |   message: string | null
+  50 | 
+  51 |   errors: string[]
+  52 | 
+  53 |   data: T | null
+  54 | 
+  55 |   status: string
+  56 | }
+  57 | 
+  58 | 
+  59 | const CATEGORY_API_PATH =
+  60 |   '/api/v1Categories/V1'
+  61 | 
+  62 | 
+  63 | function buildCategoryListQuery(
+  64 |   request: CategoryListRequest,
+  65 | ): string {
+  66 |   const params =
+  67 |     new URLSearchParams()
+  68 | 
+  69 |   params.set(
+  70 |     'page_number',
+  71 |     String(request.page_number),
+  72 |   )
+  73 | 
+  74 |   params.set(
+  75 |     'page_size',
+  76 |     String(request.page_size),
+  77 |   )
+  78 | 
+  79 |   params.set(
+  80 |     'is_ascending',
+  81 |     String(request.is_ascending),
+  82 |   )
+  83 | 
+  84 |   if (request.sort_by) {
+  85 |     params.set(
+  86 |       'sort_by',
+  87 |       request.sort_by,
+  88 |     )
+  89 |   }
+  90 | 
+  91 |   /*
+  92 |    * IMPORTANT:
+  93 |    *
+  94 |    * Backend Category MVP currently has no search parameter.
+  95 |    * Do not send request.search yet.
+  96 |    *
+  97 |    * When backend search is implemented later,
+  98 |    * it can be added here without changing the page UI.
+  99 |    */
+ 100 | 
+ 101 |   return params.toString()
+ 102 | }
+ 103 | 
+ 104 | 
+ 105 | export async function getPagedCategories(
+ 106 |   request: CategoryListRequest,
+ 107 | ): Promise<PagedResult<Category>> {
+ 108 |   const query =
+ 109 |     buildCategoryListQuery(
+ 110 |       request,
+ 111 |     )
+ 112 | 
+ 113 |   const response =
+ 114 |     await apiClient.get<
+ 115 |       ApiResponse<
+ 116 |         PagedResult<CategorySummaryApiDto>
+ 117 |       >
+ 118 |     >(
+ 119 |       `${CATEGORY_API_PATH}?${query}`,
+ 120 |     )
+ 121 | 
+ 122 |   if (
+ 123 |     !response.is_success ||
+ 124 |     !response.data
+ 125 |   ) {
+ 126 |     throw new Error(
+ 127 |       response.message ??
+ 128 |         'دریافت دسته‌بندی‌ها ناموفق بود.',
+ 129 |     )
+ 130 |   }
+ 131 | 
+ 132 |   /*
+ 133 |    * List endpoint intentionally returns CategorySummaryDto
+ 134 |    * and therefore does not contain fields.
+ 135 |    *
+ 136 |    * We normalize it to the existing frontend Category shape
+ 137 |    * so the current table/design remains completely unchanged.
+ 138 |    *
+ 139 |    * Full fields will later be loaded from:
+ 140 |    * GET /api/v1Categories/V1/{category_id}
+ 141 |    */
+ 142 |   return {
+ 143 |     ...response.data,
+ 144 | 
+ 145 |     items:
+ 146 |       response.data.items.map(
+ 147 |         (category) => ({
+ 148 |           ...category,
+ 149 | 
+ 150 |           fields: [],
+ 151 |         }),
+ 152 |       ),
+ 153 |   }
+ 154 | }
+ 155 | 
+ 156 | export interface CreateCategoryRequest {
+ 157 |   name: string
+ 158 | 
+ 159 |   description?: string | null
+ 160 | 
+ 161 |   fields: DynamicFieldDefinition[]
+ 162 | }
+ 163 | 
+ 164 | 
+ 165 | export async function createCategory(
+ 166 |   request: CreateCategoryRequest,
+ 167 | ): Promise<number> {
+ 168 |   const response =
+ 169 |     await apiClient.post<
+ 170 |       ApiResponse<number>
+ 171 |     >(
+ 172 |       `${CATEGORY_API_PATH}/create`,
+ 173 |       request,
+ 174 |     )
+ 175 | 
+ 176 |   if (
+ 177 |     !response.is_success ||
+ 178 |     response.data === null
+ 179 |   ) {
+ 180 |     throw new Error(
+ 181 |       response.message ??
+ 182 |         'ایجاد دستهبندی ناموفق بود.',
+ 183 |     )
+ 184 |   }
+ 185 | 
+ 186 |   return response.data
+ 187 | }
+ 188 | 
+ 189 | export async function getCategoryById(
+ 190 |   categoryId: number,
+ 191 | ): Promise<Category> {
+ 192 |   const response =
+ 193 |     await apiClient.get<
+ 194 |       ApiResponse<Category>
+ 195 |     >(
+ 196 |       `${CATEGORY_API_PATH}/${categoryId}`,
+ 197 |     )
+ 198 | 
+ 199 |   if (
+ 200 |     !response.is_success ||
+ 201 |     !response.data
+ 202 |   ) {
+ 203 |     throw new Error(
+ 204 |       response.message ??
+ 205 |         'دریافت اطلاعات دستهبندی ناموفق بود.',
+ 206 |     )
+ 207 |   }
+ 208 | 
+ 209 |   return response.data
+ 210 | }
+ 211 | 
+ 212 | export interface UpdateCategoryRequest {
+ 213 |   name: string
+ 214 | 
+ 215 |   description?: string | null
+ 216 | 
+ 217 |   fields: DynamicFieldDefinition[]
+ 218 | }
+ 219 | 
+ 220 | 
+ 221 | export async function updateCategory(
+ 222 |   categoryId: number,
+ 223 |   request: UpdateCategoryRequest,
+ 224 | ): Promise<number> {
+ 225 |   const response =
+ 226 |     await apiClient.put<
+ 227 |       ApiResponse<number>
+ 228 |     >(
+ 229 |       `${CATEGORY_API_PATH}/${categoryId}`,
+ 230 |       request,
+ 231 |     )
+ 232 | 
+ 233 |   if (
+ 234 |     !response.is_success ||
+ 235 |     response.data === null
+ 236 |   ) {
+ 237 |     throw new Error(
+ 238 |       response.message ??
+ 239 |         'ویرایش دستهبندی ناموفق بود.',
+ 240 |     )
+ 241 |   }
+ 242 | 
+ 243 |   return response.data
+ 244 | }
+ 245 | 
+ 246 | export async function deleteCategory(
+ 247 |   categoryId: number,
+ 248 | ): Promise<boolean> {
+ 249 |   const response =
+ 250 |     await apiClient.delete<
+ 251 |       ApiResponse<boolean>
+ 252 |     >(
+ 253 |       `${CATEGORY_API_PATH}/${categoryId}`,
+ 254 |     )
+ 255 | 
+ 256 |   if (
+ 257 |     !response.is_success ||
+ 258 |     response.data !== true
+ 259 |   ) {
+ 260 |     throw new Error(
+ 261 |       response.message ??
+ 262 |         'حذف دستهبندی ناموفق بود.',
+ 263 |     )
+ 264 |   }
+ 265 | 
+ 266 |   return true
+ 267 | }
+
+============================================================
+FILE: E:\Computer\proj\RWMS_Front\src\modules\categories\types\category.types.ts
+============================================================
+   1 | import type {
+   2 |   DynamicFieldDefinition,
+   3 | } from '@/shared/dynamic-fields'
+   4 | 
+   5 | 
+   6 | export {
+   7 |   dynamicFieldTypes,
+   8 | } from '@/shared/dynamic-fields'
+   9 | 
+  10 | 
+  11 | export type {
+  12 |   DynamicFieldDefinition,
+  13 |   DynamicFieldOption,
+  14 |   DynamicFieldType,
+  15 | } from '@/shared/dynamic-fields'
+  16 | 
+  17 | 
+  18 | export interface Category {
+  19 |   id: number
+  20 | 
+  21 |   name: string
+  22 | 
+  23 |   description:
+  24 |     string | null
+  25 | 
+  26 |   fields:
+  27 |     DynamicFieldDefinition[]
+  28 | 
+  29 |   created_at: string
+  30 | 
+  31 |   updated_at: string
+  32 | }
+
+============================================================
+FILE: E:\Computer\proj\RWMS_Front\src\shared\api\apiClient.ts
+============================================================
+   1 | import { env } from '@/app/config/env'
+   2 | 
+   3 | import ApiError from './ApiError'
+   4 | import { getApiHooks } from './apiHooks'
+   5 | 
+   6 | type HttpMethod =
+   7 |   | 'GET'
+   8 |   | 'POST'
+   9 |   | 'PUT'
+  10 |   | 'PATCH'
+  11 |   | 'DELETE'
+  12 | 
+  13 | interface ApiRequestOptions
+  14 |   extends Omit<
+  15 |     RequestInit,
+  16 |     'method' | 'body' | 'signal'
+  17 |   > {
+  18 |   method?: HttpMethod
+  19 |   body?: unknown
+  20 |   retryCount?: number
+  21 | }
+  22 | 
+  23 | async function parseResponseBody(
+  24 |   response: Response,
+  25 | ): Promise<unknown> {
+  26 |   if (response.status === 204) {
+  27 |     return null
+  28 |   }
+  29 | 
+  30 |   const contentType =
+  31 |     response.headers.get('content-type') ?? ''
+  32 | 
+  33 |   if (contentType.includes('application/json')) {
+  34 |     return response.json()
+  35 |   }
+  36 | 
+  37 |   const text = await response.text()
+  38 | 
+  39 |   return text || null
+  40 | }
+  41 | 
+  42 | function getErrorMessage(
+  43 |   data: unknown,
+  44 |   fallback: string,
+  45 | ): string {
+  46 |   if (
+  47 |     typeof data === 'object' &&
+  48 |     data !== null &&
+  49 |     'detail' in data
+  50 |   ) {
+  51 |     const detail = data.detail
+  52 | 
+  53 |     if (typeof detail === 'string') {
+  54 |       return detail
+  55 |     }
+  56 |   }
+  57 | 
+  58 |   return fallback
+  59 | }
+  60 | 
+  61 | function isFormData(
+  62 |   value: unknown,
+  63 | ): value is FormData {
+  64 |   return (
+  65 |     typeof FormData !== 'undefined' &&
+  66 |     value instanceof FormData
+  67 |   )
+  68 | }
+  69 | 
+  70 | function normalizeApiError(
+  71 |   error: unknown,
+  72 | ): ApiError {
+  73 |   if (error instanceof ApiError) {
+  74 |     return error
+  75 |   }
+  76 | 
+  77 |   if (
+  78 |     error instanceof DOMException &&
+  79 |     error.name === 'AbortError'
+  80 |   ) {
+  81 |     return new ApiError({
+  82 |       status: 0,
+  83 |       message:
+  84 |         'زمان پاسخگویی سرور بیش از حد مجاز شد.',
+  85 |       cause: error,
+  86 |     })
+  87 |   }
+  88 | 
+  89 |   return new ApiError({
+  90 |     status: 0,
+  91 |     message:
+  92 |       'ارتباط با سرور برقرار نشد.',
+  93 |     cause: error,
+  94 |   })
+  95 | }
+  96 | 
+  97 | async function request<T>(
+  98 |   path: string,
+  99 |   options: ApiRequestOptions = {},
+ 100 | ): Promise<T> {
+ 101 |   const {
+ 102 |     method = 'GET',
+ 103 |     body,
+ 104 |     headers: customHeaders,
+ 105 |     retryCount = 0,
+ 106 |     ...requestOptions
+ 107 |   } = options
+ 108 | 
+ 109 |   const controller =
+ 110 |     new AbortController()
+ 111 | 
+ 112 |   const timeoutId = window.setTimeout(
+ 113 |     () => controller.abort(),
+ 114 |     env.apiTimeoutMs,
+ 115 |   )
+ 116 | 
+ 117 |   const url =
+ 118 |     `${env.apiBaseUrl}${path}`
+ 119 | 
+ 120 |   try {
+ 121 |     const headers =
+ 122 |       new Headers(customHeaders)
+ 123 | 
+ 124 |     headers.set(
+ 125 |       'Accept',
+ 126 |       'application/json',
+ 127 |     )
+ 128 | 
+ 129 |     const hasBody =
+ 130 |       body !== undefined &&
+ 131 |       body !== null
+ 132 | 
+ 133 |     const bodyIsFormData =
+ 134 |       isFormData(body)
+ 135 | 
+ 136 |     if (
+ 137 |       hasBody &&
+ 138 |       !bodyIsFormData &&
+ 139 |       !headers.has('Content-Type')
+ 140 |     ) {
+ 141 |       headers.set(
+ 142 |         'Content-Type',
+ 143 |         'application/json',
+ 144 |       )
+ 145 |     }
+ 146 | 
+ 147 |     const init: RequestInit = {
+ 148 |       ...requestOptions,
+ 149 | 
+ 150 |       method,
+ 151 | 
+ 152 |       headers,
+ 153 | 
+ 154 |       signal: controller.signal,
+ 155 | 
+ 156 |       body: !hasBody
+ 157 |         ? undefined
+ 158 |         : bodyIsFormData
+ 159 |           ? body
+ 160 |           : JSON.stringify(body),
+ 161 |     }
+ 162 | 
+ 163 |     const hooks = getApiHooks()
+ 164 | 
+ 165 |     await hooks.beforeRequest?.({
+ 166 |       url,
+ 167 |       init,
+ 168 |     })
+ 169 | 
+ 170 |     const response =
+ 171 |       await fetch(url, init)
+ 172 | 
+ 173 |     const data =
+ 174 |       await parseResponseBody(response)
+ 175 | 
+ 176 |     if (!response.ok) {
+ 177 |       throw new ApiError({
+ 178 |         status: response.status,
+ 179 | 
+ 180 |         message: getErrorMessage(
+ 181 |           data,
+ 182 |           `Request failed with status ${response.status}`,
+ 183 |         ),
+ 184 | 
+ 185 |         data,
+ 186 |       })
+ 187 |     }
+ 188 | 
+ 189 |     return data as T
+ 190 |   } catch (error) {
+ 191 |     const apiError =
+ 192 |       normalizeApiError(error)
+ 193 | 
+ 194 |     const hooks =
+ 195 |       getApiHooks()
+ 196 | 
+ 197 |     const context = {
+ 198 |       error: apiError,
+ 199 |       retryCount,
+ 200 |     }
+ 201 | 
+ 202 |     if (apiError.status === 401) {
+ 203 |       const action =
+ 204 |         await hooks.onUnauthorized?.(
+ 205 |           context,
+ 206 |         )
+ 207 | 
+ 208 |       if (
+ 209 |         action === 'retry' &&
+ 210 |         retryCount < 1
+ 211 |       ) {
+ 212 |         return request<T>(
+ 213 |           path,
+ 214 |           {
+ 215 |             ...options,
+ 216 |             retryCount:
+ 217 |               retryCount + 1,
+ 218 |           },
+ 219 |         )
+ 220 |       }
+ 221 |     }
+ 222 | 
+ 223 |     if (apiError.status === 403) {
+ 224 |       await hooks.onForbidden?.(
+ 225 |         context,
+ 226 |       )
+ 227 |     }
+ 228 | 
+ 229 |     await hooks.onError?.(
+ 230 |       context,
+ 231 |     )
+ 232 | 
+ 233 |     throw apiError
+ 234 |   } finally {
+ 235 |     window.clearTimeout(timeoutId)
+ 236 |   }
+ 237 | }
+ 238 | 
+ 239 | export const apiClient = {
+ 240 |   get<T>(
+ 241 |     path: string,
+ 242 |     options?: Omit<
+ 243 |       ApiRequestOptions,
+ 244 |       'method' | 'body'
+ 245 |     >,
+ 246 |   ) {
+ 247 |     return request<T>(
+ 248 |       path,
+ 249 |       {
+ 250 |         ...options,
+ 251 |         method: 'GET',
+ 252 |       },
+ 253 |     )
+ 254 |   },
+ 255 | 
+ 256 |   post<T>(
+ 257 |     path: string,
+ 258 |     body?: unknown,
+ 259 |     options?: Omit<
+ 260 |       ApiRequestOptions,
+ 261 |       'method' | 'body'
+ 262 |     >,
+ 263 |   ) {
+ 264 |     return request<T>(
+ 265 |       path,
+ 266 |       {
+ 267 |         ...options,
+ 268 |         method: 'POST',
+ 269 |         body,
+ 270 |       },
+ 271 |     )
+ 272 |   },
+ 273 | 
+ 274 |   put<T>(
+ 275 |     path: string,
+ 276 |     body?: unknown,
+ 277 |     options?: Omit<
+ 278 |       ApiRequestOptions,
+ 279 |       'method' | 'body'
+ 280 |     >,
+ 281 |   ) {
+ 282 |     return request<T>(
+ 283 |       path,
+ 284 |       {
+ 285 |         ...options,
+ 286 |         method: 'PUT',
+ 287 |         body,
+ 288 |       },
+ 289 |     )
+ 290 |   },
+ 291 | 
+ 292 |   patch<T>(
+ 293 |     path: string,
+ 294 |     body?: unknown,
+ 295 |     options?: Omit<
+ 296 |       ApiRequestOptions,
+ 297 |       'method' | 'body'
+ 298 |     >,
+ 299 |   ) {
+ 300 |     return request<T>(
+ 301 |       path,
+ 302 |       {
+ 303 |         ...options,
+ 304 |         method: 'PATCH',
+ 305 |         body,
+ 306 |       },
+ 307 |     )
+ 308 |   },
+ 309 | 
+ 310 |   delete<T>(
+ 311 |     path: string,
+ 312 |     options?: Omit<
+ 313 |       ApiRequestOptions,
+ 314 |       'method' | 'body'
+ 315 |     >,
+ 316 |   ) {
+ 317 |     return request<T>(
+ 318 |       path,
+ 319 |       {
+ 320 |         ...options,
+ 321 |         method: 'DELETE',
+ 322 |       },
+ 323 |     )
+ 324 |   },
+ 325 | }
+ 326 | 
+
+============================================================
+FILE: E:\Computer\proj\RWMS_Front\src\shared\api\ApiError.ts
+============================================================
+   1 | export interface ApiErrorOptions {
+   2 |   status: number
+   3 |   message: string
+   4 |   data?: unknown
+   5 |   cause?: unknown
+   6 | }
+   7 | 
+   8 | class ApiError extends Error {
+   9 |   readonly status: number
+  10 |   readonly data?: unknown
+  11 | 
+  12 |   constructor({
+  13 |     status,
+  14 |     message,
+  15 |     data,
+  16 |     cause,
+  17 |   }: ApiErrorOptions) {
+  18 |     super(message, { cause })
+  19 | 
+  20 |     this.name = 'ApiError'
+  21 |     this.status = status
+  22 |     this.data = data
+  23 |   }
+  24 | 
+  25 |   get isUnauthorized() {
+  26 |     return this.status === 401
+  27 |   }
+  28 | 
+  29 |   get isForbidden() {
+  30 |     return this.status === 403
+  31 |   }
+  32 | 
+  33 |   get isValidationError() {
+  34 |     return this.status === 422
+  35 |   }
+  36 | 
+  37 |   get isServerError() {
+  38 |     return this.status >= 500
+  39 |   }
+  40 | 
+  41 |   get isNetworkError() {
+  42 |     return this.status === 0
+  43 |   }
+  44 | }
+  45 | 
+  46 | export default ApiError
+  47 | 
+
+============================================================
+FILE: E:\Computer\proj\RWMS_Front\src\shared\api\apiHooks.ts
+============================================================
+   1 | import type ApiError from './ApiError'
+   2 | 
+   3 | export type ApiErrorAction =
+   4 |   | 'throw'
+   5 |   | 'retry'
+   6 | 
+   7 | export interface ApiRequestHookContext {
+   8 |   url: string
+   9 |   init: RequestInit
+  10 | }
+  11 | 
+  12 | export interface ApiErrorHookContext {
+  13 |   error: ApiError
+  14 |   retryCount: number
+  15 | }
+  16 | 
+  17 | export interface ApiHooks {
+  18 |   beforeRequest?: (
+  19 |     context: ApiRequestHookContext,
+  20 |   ) => void | Promise<void>
+  21 | 
+  22 |   onUnauthorized?: (
+  23 |     context: ApiErrorHookContext,
+  24 |   ) =>
+  25 |     | ApiErrorAction
+  26 |     | void
+  27 |     | Promise<ApiErrorAction | void>
+  28 | 
+  29 |   onForbidden?: (
+  30 |     context: ApiErrorHookContext,
+  31 |   ) => void | Promise<void>
+  32 | 
+  33 |   onError?: (
+  34 |     context: ApiErrorHookContext,
+  35 |   ) => void | Promise<void>
+  36 | }
+  37 | 
+  38 | let hooks: ApiHooks = {}
+  39 | 
+  40 | export function configureApiHooks(
+  41 |   newHooks: ApiHooks,
+  42 | ) {
+  43 |   hooks = {
+  44 |     ...hooks,
+  45 |     ...newHooks,
+  46 |   }
+  47 | }
+  48 | 
+  49 | export function resetApiHooks() {
+  50 |   hooks = {}
+  51 | }
+  52 | 
+  53 | export function getApiHooks() {
+  54 |   return hooks
+  55 | }
+  56 | 
+
+============================================================
+FILE: E:\Computer\proj\RWMS_Front\src\shared\api\index.ts
+============================================================
+   1 | export { default as ApiError } from './ApiError'
+   2 | 
+   3 | export {
+   4 |   configureApiHooks,
+   5 |   resetApiHooks,
+   6 | } from './apiHooks'
+   7 | 
+   8 | export { apiClient } from './apiClient'
+   9 | 
+  10 | export type {
+  11 |   ApiErrorAction,
+  12 |   ApiErrorHookContext,
+  13 |   ApiHooks,
+  14 |   ApiRequestHookContext,
+  15 | } from './apiHooks'
+  16 | 
+
+============================================================
+FILE: E:\Computer\proj\RWMS_Front\src\shared\types\index.ts
+============================================================
+   1 | export type {
+   2 |   PagedRequest,
+   3 |   PagedResult,
+   4 | } from './pagination.types'
+
+============================================================
+FILE: E:\Computer\proj\RWMS_Front\src\shared\types\pagination.types.ts
+============================================================
+   1 | export interface PagedRequest<TFilter = null> {
+   2 |   page_number: number
+   3 |   page_size: number
+   4 | 
+   5 |   sort_by: string | null
+   6 |   is_ascending: boolean
+   7 | 
+   8 |   filter: TFilter | null
+   9 | }
+  10 | 
+  11 | export interface PagedResult<TItem> {
+  12 |   items: TItem[]
+  13 | 
+  14 |   total_count: number
+  15 | 
+  16 |   page_number: number
+  17 |   page_size: number
+  18 | 
+  19 |   total_pages: number
+  20 | 
+  21 |   has_previous_page: boolean
+  22 |   has_next_page: boolean
+  23 | }
+
+============================================================
+FILE: .\src\shared\notifications\index.ts
+============================================================
+   1 | export { notify } from './notify'
+   2 | 
+
+============================================================
+FILE: .\src\shared\forms\index.ts
+============================================================
+   1 | export {
+   2 |   applyFastApiValidationErrors,
+   3 | } from './fastApiValidation'
+   4 | 
+   5 | export {
+   6 |   zodResolver,
+   7 | } from './zodResolver'
+   8 | 
+
+============================================================
+FILE: .\src\app\router\moduleRoutes.ts
+============================================================
+   1 | import type {
+   2 |   RouteObject,
+   3 | } from 'react-router'
+   4 | 
+   5 | import {
+   6 |   categoryRoutes,
+   7 | } from '@/modules/categories/routes'
+   8 | 
+   9 | 
+  10 | 
+  11 | import {
+  12 |   productRoutes,
+  13 | } from '@/modules/products/routes'
+  14 | 
+  15 | 
+  16 | import {
+  17 |   waybillTemplateRoutes,
+  18 | } from '@/modules/waybill-templates/routes'
+  19 | 
+  20 | 
+  21 | import {
+  22 |   waybillRoutes,
+  23 | } from '@/modules/waybills/routes'
+  24 | 
+  25 | export const moduleRoutes: RouteObject[] = [
+  26 |         ...waybillRoutes,
+  27 | ...waybillTemplateRoutes,
+  28 | ...productRoutes,
+  29 | ...categoryRoutes,
+  30 | ]
+
+============================================================
+FILE: .\src\app\router\AppRouter.tsx
+============================================================
+   1 | import {
+   2 |   moduleRoutes,
+   3 | } from './moduleRoutes'
+   4 | import { createBrowserRouter } from 'react-router'
+   5 | import { RouterProvider } from 'react-router/dom'
+   6 | 
+   7 | import MainLayout from '@/app/layouts/MainLayout'
+   8 | import NotFoundPage from '@/app/pages/NotFoundPage'
+   9 | import RouteErrorPage from '@/app/pages/RouteErrorPage'
+  10 | import { DashboardPage } from '@/modules/dashboard'
+  11 | const router = createBrowserRouter([
+  12 |   {
+  13 |     path: '/',
+  14 |     element: <MainLayout />,
+  15 |     ErrorBoundary: RouteErrorPage,
+  16 | 
+  17 |     children: [
+  18 |       {
+  19 |         index: true,
+  20 |         element: <DashboardPage />,
+  21 |       },
+  22 |       ...moduleRoutes,
+  23 | 
+  24 |       {
+  25 |         path: '*',
+  26 |         element: <NotFoundPage />,
+  27 |       },
+  28 |     ],
+  29 |   },
+  30 | ])
+  31 | 
+  32 | function AppRouter() {
+  33 |   return <RouterProvider router={router} />
+  34 | }
+  35 | 
+  36 | export default AppRouter

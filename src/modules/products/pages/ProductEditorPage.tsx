@@ -16,8 +16,13 @@ import {
 } from 'react-router'
 
 import {
-  mockCategories,
-} from '@/modules/categories/mocks/categories.mock'
+  getCategoryById,
+  getPagedCategories,
+} from '@/modules/categories/api/category.api'
+
+import type {
+  Category,
+} from '@/modules/categories/types/category.types'
 
 import {
   Button,
@@ -47,7 +52,7 @@ import {
   createProduct,
   getProductById,
   updateProduct,
-} from '../mocks/productRepository.mock'
+} from '../api/product.api'
 
 import type {
   ProductDynamicField,
@@ -55,9 +60,10 @@ import type {
 
 
 function buildFields(
+  categories: Category[],
   selectedCategoryIds: number[],
 ): ProductDynamicField[] {
-  return mockCategories
+  return categories
     .filter(
       (category) =>
         selectedCategoryIds.includes(
@@ -139,6 +145,14 @@ function ProductEditorPage() {
 
 
   const [
+    categories,
+    setCategories,
+  ] = useState<Category[]>(
+    [],
+  )
+
+
+  const [
     name,
     setName,
   ] = useState('')
@@ -196,9 +210,11 @@ function ProductEditorPage() {
     useMemo(
       () =>
         buildFields(
+          categories,
           selectedCategoryIds,
         ),
       [
+        categories,
         selectedCategoryIds,
       ],
     )
@@ -254,30 +270,6 @@ function ProductEditorPage() {
 
   useEffect(
     () => {
-      if (!isEdit) {
-        return
-      }
-
-      const id =
-        Number(productId)
-
-      if (
-        !Number.isInteger(
-          id,
-        )
-      ) {
-        notify.error(
-          'شناسه کالا معتبر نیست.',
-        )
-
-        navigate(
-          '/products',
-        )
-
-        return
-      }
-
-
       let active = true
 
 
@@ -285,16 +277,108 @@ function ProductEditorPage() {
         try {
           setLoading(true)
 
-          const product =
-            await getProductById(
-              id,
+
+          let productIdNumber:
+            number | null =
+              null
+
+
+          if (isEdit) {
+            productIdNumber =
+              Number(
+                productId,
+              )
+
+            if (
+              !Number.isInteger(
+                productIdNumber,
+              )
+            ) {
+              notify.error(
+                'شناسه کالا معتبر نیست.',
+              )
+
+              navigate(
+                '/products',
+              )
+
+              return
+            }
+          }
+
+
+          /*
+           * Backend supports:
+           *
+           * page_number = -1
+           * page_size   = -1
+           *
+           * which returns all Categories.
+           */
+          const categoryResult =
+            await getPagedCategories({
+              page_number: -1,
+              page_size: -1,
+              sort_by: 'name',
+              is_ascending: true,
+              filter: null,
+            })
+
+
+          /*
+           * Category list returns Summary DTO
+           * and therefore does not include fields.
+           *
+           * Load each Category detail so the
+           * selector and Product Dynamic Fields
+           * use REAL backend definitions.
+           */
+          const categoryDetails =
+            await Promise.all(
+              categoryResult.items.map(
+                (category) =>
+                  getCategoryById(
+                    category.id,
+                  ),
+              ),
             )
 
+
+          if (!active) {
+            return
+          }
+
+
+          setCategories(
+            categoryDetails,
+          )
+
+
+          /*
+           * CREATE mode needs only Categories.
+           */
           if (
-            !active
+            !isEdit ||
+            productIdNumber === null
           ) {
             return
           }
+
+
+          /*
+           * EDIT mode:
+           * load real Product detail.
+           */
+          const product =
+            await getProductById(
+              productIdNumber,
+            )
+
+
+          if (!active) {
+            return
+          }
+
 
           if (!product) {
             notify.error(
@@ -308,10 +392,16 @@ function ProductEditorPage() {
             return
           }
 
+
           setName(
             product.name,
           )
 
+
+          /*
+           * Preselect categories already assigned
+           * to the Product.
+           */
           setSelectedCategoryIds(
             product.categories.map(
               (category) =>
@@ -319,9 +409,17 @@ function ProductEditorPage() {
             ),
           )
 
+
+          /*
+           * Preserve current Product values.
+           *
+           * Dynamic field definitions themselves
+           * come from current real Categories.
+           */
           const loadedValues:
             ProductFormValues =
               {}
+
 
           for (
             const field of
@@ -333,8 +431,17 @@ function ProductEditorPage() {
               field.value
           }
 
+
           setValues(
             loadedValues,
+          )
+        } catch {
+          if (!active) {
+            return
+          }
+
+          notify.error(
+            'دریافت اطلاعات لازم برای فرم کالا انجام نشد.',
           )
         } finally {
           if (active) {
@@ -473,6 +580,9 @@ function ProductEditorPage() {
         attributes:
           fields.map(
             (field) => ({
+              category_id:
+                field.category_id,
+
               field_id:
                 field.field_id,
 
@@ -629,6 +739,9 @@ function ProductEditorPage() {
 
 
       <ProductCategorySelector
+        categories={
+          categories
+        }
         selectedIds={
           selectedCategoryIds
         }
