@@ -1,7 +1,0 @@
-تکمیل زیرساخت پروژه: تنظیم Alias مثل @/modules/...، RTL، فونت فارسی، Global Style و انتقال رنگ‌هایی که قرارداد کردیم به Design Tokenهای واقعی Tailwind.
-Routing و App Shell: انتخاب و راه‌اندازی Router و ساخت اسکلت اصلی نرم‌افزار شامل Sidebar + Header + Content.
-لایه ارتباط با Backend: مشخص‌کردن API Client، مدیریت خطاها، Base URL، Headerها و ساختار استاندارد Request/Response.
-مدیریت Server State: تصمیم درباره TanStack Query و اینکه Fetching/Caching/Loading/Error در کل سیستم چه استانداردی داشته باشد.
-فرم‌ها و Validation: انتخاب نهایی ابزار Form و Schema؛ احتمالاً React Hook Form + Zod.
-UI Foundation: ساخت اولین Componentهای عمومی مثل Button, Input, Select, Card, PageHeader, Modal و غیره بر اساس تمی که مستند کردیم.
-بعد از تثبیت این پایه‌ها، اولین ماژول واقعی را شروع کنیم؛ پیشنهاد من categories است چون هم CRUD دارد، هم Dynamic Field و خیلی خوب معماری ما را محک می‌زند.

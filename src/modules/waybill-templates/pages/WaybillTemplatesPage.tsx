@@ -35,7 +35,7 @@ import {
 import {
   deleteWaybillTemplate,
   listWaybillTemplates,
-} from '../mocks/waybillTemplateRepository.mock'
+} from '../api/waybill-template.api'
 
 import type {
   WaybillTemplateSummary,
@@ -200,6 +200,12 @@ function WaybillTemplatesPage() {
               result.page_number,
             )
           }
+        } catch (error) {
+          notify.error(
+            error instanceof Error
+              ? error.message
+              : 'دریافت قالبهای بارنامه ناموفق بود.',
+          )
         } finally {
           setLoading(false)
         }
@@ -242,6 +248,12 @@ function WaybillTemplatesPage() {
       )
 
       await load()
+    } catch (error) {
+      notify.error(
+        error instanceof Error
+          ? error.message
+          : 'حذف قالب بارنامه انجام نشد.',
+      )
     } finally {
       setDeleting(false)
     }

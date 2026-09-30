@@ -1686,12 +1686,16 @@ export function DynamicFieldEditor({
                       ? 'false'
                       : ''
                 }
-                onChange={(event) =>
+                onChange={(event) => {
+                  const value =
+                    event.target.value
+
                   setDefaultValue(
-                    event.target
-                      .value,
+                    value === ''
+                      ? null
+                      : value === 'true',
                   )
-                }
+                }}
               >
                 <option value="">
                   بدون مقدار پیشفرض

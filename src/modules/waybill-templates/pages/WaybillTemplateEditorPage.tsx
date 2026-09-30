@@ -54,7 +54,7 @@ import {
   createWaybillTemplate,
   getWaybillTemplateById,
   updateWaybillTemplate,
-} from '../mocks/waybillTemplateRepository.mock'
+} from '../api/waybill-template.api'
 
 
 function buildPreviewValues(
@@ -345,6 +345,14 @@ function WaybillTemplateEditorPage() {
           setFields(
             template.fields,
           )
+        } catch (error) {
+          if (active) {
+            notify.error(
+              error instanceof Error
+                ? error.message
+                : 'دریافت قالب بارنامه ناموفق بود.',
+            )
+          }
         } finally {
           if (active) {
             setLoading(false)
@@ -581,6 +589,16 @@ function WaybillTemplateEditorPage() {
 
       navigate(
         '/waybill-templates',
+      )
+    } catch (error) {
+      notify.error(
+        error instanceof Error
+          ? error.message
+          : (
+              isEdit
+                ? 'ویرایش قالب بارنامه انجام نشد.'
+                : 'ایجاد قالب بارنامه انجام نشد.'
+            ),
       )
     } finally {
       setSaving(false)
